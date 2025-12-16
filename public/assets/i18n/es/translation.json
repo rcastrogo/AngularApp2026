@@ -1,0 +1,150 @@
+{
+    "lang": "es",
+    "language": {
+        "es": "Español",
+        "en": "Inglés"
+    },
+    "app-name": "Angular App",
+    "footer-text": "Rafael Castro Gómez, 2025",
+    "general": {
+        "action": {
+            "accept": "Aceptar",
+            "close": "Cerrar",
+            "cancel": "Cancelar",
+            "loading": "Cargando...",
+            "loading-data": "Cargando datos..."
+        },
+        "noResultsInTable": "No hay resultados",
+        "suggest_results_one": "{{count}} resultado",
+        "suggest_results_other": "{{count}} resultados"
+    },
+    "footer": {
+        "description": "Una aplicación web moderna construida con Angular, Tailwind CSS y cariño.",
+        "links": {
+            "title": "Enlaces",
+            "home": "Inicio",
+            "about": "Acerca de",
+            "countries": "Paises",
+            "contact": "Contacto",
+            "dashboard": "Panel de control",
+            "search": "Buscar"
+        },
+        "resources": {
+            "title": "Recursos",
+            "documentation": "Documentación",
+            "api": "Referencia API",
+            "blog": "Blog",
+            "support": "Soporte"
+        },
+        "follow": {
+            "title": "Síguenos"
+        }
+    },
+    "home": {
+        "title": "Bienvenido a Angular App",
+        "subtitle": "Una aplicación web moderna construida con Angular, Tailwind CSS y cariño. Explora las distintas secciones, experimenta con nuestra tabla paginada y descubre todas las funcionalidades incluidas.",
+        "viewRepo": "Ver repositorio",
+        "cards": {
+            "pagedTable": {
+                "title": "Tabla de países",
+                "description": "Prueba el componente PagedTable cargando los países y viendo su funcionamiento."
+            },
+            "about": {
+                "title": "Acerca de Angular App",
+                "description": "Información general sobre cómo está creada y qué tecnologías utiliza."
+            },
+            "config": {
+                "title": "Configuración",
+                "description": "Ajusta las preferencias de la aplicación y personaliza tu experiencia."
+            },
+            "contact": {
+                "title": "Contacto",
+                "description": "Ponte en contacto con nosotros para dudas, soporte o sugerencias."
+            },
+            "dashboard": {
+                "title": "Búsqueda de países",
+                "description": "Visualiza métricas, gráficos y datos relevantes de la aplicación."
+            }
+        }
+    },
+    "dashboard": {
+        "search-country": "Introduce el texto...",
+        "search-title": "Buscar país",
+        "search-description": "Escribe al menos 2 letras para buscar un país.",
+        "search-placeholder": "Introduce el nombre del país...",
+        "results-found": "{{count}} país(es) encontrado(s)",
+        "no-results": "No se encontraron países."
+    },
+    "about": {
+        "title": "Acerca de Angular App",
+        "section1": {
+            "title": "¿Qué es esta aplicación?",
+            "body": "Esta aplicación está diseñada como un conjunto de ejemplos, utilidades y componentes reutilizables creados con Angular, TypeScript y Tailwind CSS. Su objetivo es servir como base sólida para proyectos modernos, demostrando patrones de diseño, integración de APIs, internacionalización y componentes avanzados."
+        },
+        "section2": {
+            "title": "Tecnologías utilizadas",
+            "body": "Incluye ejemplos de integración con APIs externas, un sistema avanzado de alertas globales, componentes reutilizables como tablas paginadas, autocompletado, gestión de temas, i18n, navegación dinámica y mucho más."
+        },
+        "alertDemo": {
+            "title": "Demostración del sistema de alertas",
+            "buttons": {
+                "info": "Mostrar Info",
+                "success": "Mostrar Éxito",
+                "warning": "Mostrar Aviso",
+                "error": "Mostrar Error",
+                "question": "Mostrar Pregunta",
+                "loading": "Mostrar Cargando"
+            },
+            "sample": {
+                "info": "Este es un mensaje informativo.",
+                "success": "La operación se ha completado correctamente.",
+                "warning": "Ten en cuenta esta advertencia.",
+                "error": "Ha ocurrido un error inesperado.",
+                "question": "¿Estás seguro de que quieres continuar?",
+                "questionTitle": "Confirmación requerida",
+                "accepted": "Has aceptado la acción.",
+                "loading": "Procesando..."
+            }
+        },
+        "games": {
+            "title": "Glypy y Xalatax",
+            "body": "Hace más de 15 años ya que desarrollé dos pequeños videojuegos utilizando C# y Microsoft XNA, una tecnología que permitió a muchos desarrolladores crear experiencias 2D y 3D para Windows y Windows Phone. Estos proyectos fueron mis primeros experimentos reales en diseño de juegos, programación gráfica y control del rendimiento en dispositivos móviles.\n\nEl primero, \"Glypy\", es un juego de plataformas clásico en el que el jugador avanza superando obstáculos, saltos y enemigos, con un estilo simple pero muy divertido. \n\nEl segundo, **Xalatax**, es un arcade tipo “mata marcianos” con acción rápida, disparos constantes y un espíritu muy inspirado en los clásicos shoot ’em up. \n\nAmbos proyectos representan una etapa muy especial de experimentación y aprendizaje que marcó mi camino como desarrollador."
+        }
+    },
+    "contact": {
+        "info": {
+            "title": "Ponte en contacto",
+            "description": "Somos una empresa tecnológica especializada en desarrollo de software a medida, soluciones cloud y consultoría profesional. Escríbenos y nuestro equipo te responderá lo antes posible."
+        },
+        "form": {
+            "name": "Tu nombre",
+            "email": "Correo electrónico",
+            "message": "Tu mensaje",
+            "send": "Enviar mensaje",
+            "sending": "Enviando...",
+            "success": "¡Mensaje enviado correctamente!",
+            "errors": {
+                "name": "Por favor introduce tu nombre.",
+                "email": "Por favor introduce tu correo electrónico.",
+                "emailFormat": "Introduce un correo electrónico válido.",
+                "message": "Escribe un mensaje."
+            }
+        }
+    },
+    "config": {
+        "section": {
+            "general": {
+                "title": "Ajustes Generales",
+                "body": "Gestiona la configuración principal de la aplicación, incluyendo idioma, tema y opciones de accesibilidad. Estos ajustes afectan a toda la experiencia de usuario."
+            },
+            "preferences": {
+                "title": "Preferencias del Usuario",
+                "body": "Personaliza cómo deseas que la aplicación se comporte: notificaciones, comportamiento visual, disposición de componentes y opciones adicionales para mejorar tu flujo de trabajo."
+            },
+            "advanced": {
+                "title": "Opciones Avanzadas",
+                "body": "Configura características más técnicas, integraciones o comportamiento interno del sistema. Estas opciones están pensadas para usuarios avanzados o administradores."
+            }
+        }
+    }
+}

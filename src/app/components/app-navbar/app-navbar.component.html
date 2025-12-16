@@ -1,0 +1,28 @@
+<header class="bg-background dark:bg-background sticky top-0 z-50 w-full border-b-2 p-2">
+  <h1 class="flex-1 text-5xl font-extrabold transition text-center block sm:hidden">
+    <a routerLink="/">{{i18n.t('app-name')}}</a>
+  </h1>
+  <div class="flex items-center gap-2 p-3 max-w-5xl mx-auto sm:flex justify-center mt-4 sm:mt-0">
+    <h1 class="hidden flex-1 text-4xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold transition sm:block">
+      <a routerLink="/">{{i18n.t('app-name')}}</a>
+    </h1>
+    <div class="flex items-center gap-1 pt-0 sm:pt-2.5">
+      <nav class="flex gap-1 justify-center items-center">
+        <a routerLink="/" routerLinkActive="text-primary bg-muted" [routerLinkActiveOptions]="{exact: true}"
+           class="tool-bar-button">
+          <lucide-angular name="home" class="size-4"></lucide-angular> <span class="hidden md:block">{{i18n.t('footer.links.home')}}</span>
+        </a>
+        <a routerLink="/about" routerLinkActive="text-primary bg-muted"
+           class="tool-bar-button">
+          <lucide-angular name="info" class="size-4"></lucide-angular> <span class="hidden md:block">{{i18n.t('footer.links.about')}}</span>
+        </a>
+        <a routerLink="/contact" routerLinkActive="text-primary bg-muted"
+           class="tool-bar-button">
+          <lucide-angular name="mail" class="size-4"></lucide-angular> <span class="hidden md:block">{{i18n.t('footer.links.contact')}}</span>
+        </a>
+      </nav>
+      <app-theme-toggle></app-theme-toggle>
+      <app-language-selector></app-language-selector>
+    </div>
+  </div>
+</header>

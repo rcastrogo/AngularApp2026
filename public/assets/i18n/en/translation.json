@@ -1,0 +1,150 @@
+{
+    "lang": "en",
+    "language": {
+        "es": "Spanish",
+        "en": "English"
+    },
+    "app-name": "Angular App",
+    "footer-text": "Rafael Castro Gómez, 2025",
+    "general": {
+        "action": {
+            "accept": "Accept",
+            "close": "Close",
+            "cancel": "Cancel",
+            "loading": "Loading...",
+            "loading-data": "Loading data..."
+        },
+        "noResultsInTable": "No hay resultados",
+        "suggest_results_one": "{{count}} result",
+        "suggest_results_other": "{{count}} results"
+    },
+    "footer": {
+        "description": "A modern web application built with Angular, Tailwind CSS and love.",
+        "links": {
+            "title": "Links",
+            "home": "Home",
+            "about": "About",
+            "countries": "Countries",
+            "contact": "Contact",
+            "dashboard": "Dashboard",
+            "search": "Search"
+        },
+        "resources": {
+            "title": "Resources",
+            "documentation": "Documentation",
+            "api": "API Reference",
+            "blog": "Blog",
+            "support": "Support"
+        },
+        "follow": {
+            "title": "Follow Us"
+        }
+    },
+    "home": {
+        "title": "Welcome to the Angular App",
+        "subtitle": "A modern web application built with Angular, Tailwind CSS and love. Explore the different sections, try the paged table component, and discover all the included features.",
+        "viewRepo": "View Repository",
+        "cards": {
+            "pagedTable": {
+                "title": "Country table",
+                "description": "Test the PagedTable component by loading countries and seeing it in action."
+            },
+            "about": {
+                "title": "About the Angular App",
+                "description": "General information about how the app is built and the technologies behind it."
+            },
+            "config": {
+                "title": "Configuration",
+                "description": "Adjust application preferences and customize your experience."
+            },
+            "contact": {
+                "title": "Contact",
+                "description": "Reach out for questions, support or suggestions."
+            },
+            "dashboard": {
+                "title": "Country search",
+                "description": "View metrics, charts and relevant application data."
+            }
+        }
+    },
+    "dashboard": {
+        "search-country": "Search text...",
+        "search-title": "Search country",
+        "search-description": "Type at least 2 letters to search for a country.",
+        "search-placeholder": "Enter country name...",
+        "results-found": "{{count}} country(ies) found",
+        "no-results": "No countries found."
+    },
+    "about": {
+        "title": "About Angular App",
+        "section1": {
+            "title": "What is this app?",
+            "body": "This application is designed as a showcase of reusable examples, utilities and components built using Angular, TypeScript and Tailwind CSS. Its purpose is to provide a solid base for modern projects, demonstrating design patterns, API integration, internationalization and advanced components."
+        },
+        "section2": {
+            "title": "Technologies used",
+            "body": "It includes examples of API integration, a global alert system, reusable components such as paged tables, autocomplete, theme management, i18n, dynamic navigation and more."
+        },
+        "alertDemo": {
+            "title": "Alert system showcase",
+            "buttons": {
+                "info": "Show Info",
+                "success": "Show Success",
+                "warning": "Show Warning",
+                "error": "Show Error",
+                "question": "Show Question",
+                "loading": "Show Loading"
+            },
+            "sample": {
+                "info": "This is an informational message.",
+                "success": "The operation completed successfully.",
+                "warning": "Please pay attention to this warning.",
+                "error": "An unexpected error occurred.",
+                "question": "Are you sure you want to continue?",
+                "questionTitle": "Confirmation required",
+                "accepted": "You accepted the action.",
+                "loading": "Processing..."
+            }
+        },
+        "games": {
+            "title": "Glypy and Xalatax",
+            "body": "More than 15 years ago I developed two small videogames using C# and Microsoft XNA, a framework that enabled many developers to create 2D and 3D experiences for Windows and Windows Phone. These projects were my first real experiments in game design, graphics programming, and performance optimization on mobile devices.\n\nThe first game, \"Glypy\", is a classic platformer where the player progresses by overcoming obstacles, jumps, and enemies, keeping a simple but fun style. The second one, \"Xalatax\", is an arcade-style shoot ’em up packed with fast action, continuous firing, and a strong retro inspiration. Both projects represent a very special stage of experimentation and learning that helped shape my path as a developer."
+        }
+    },
+    "contact": {
+        "info": {
+            "title": "Get in Touch",
+            "description": "We are a technology company specialized in custom software development, cloud solutions and professional consulting. Contact us and our team will get back to you as soon as possible."
+        },
+        "form": {
+            "name": "Your name",
+            "email": "Email address",
+            "message": "Your message",
+            "send": "Send message",
+            "sending": "Sending...",
+            "success": "Message sent successfully!",
+            "errors": {
+                "name": "Please enter your name.",
+                "email": "Please enter your email address.",
+                "emailFormat": "Please enter a valid email address.",
+                "message": "Please write a message."
+            }
+        }
+    },
+    "config": {
+        "section": {
+            "general": {
+                "title": "General Settings",
+                "body": "Manage the main configuration of the application, including language, theme, and accessibility options. These settings affect the entire user experience."
+            },
+            "preferences": {
+                "title": "User Preferences",
+                "body": "Customize how you want the application to behave: notifications, visual behavior, component layout, and additional options to improve your workflow."
+            },
+            "advanced": {
+                "title": "Advanced Options",
+                "body": "Configure more technical features, integrations, or internal system behavior. These options are designed for advanced users or administrators."
+            }
+        }
+    }
+}

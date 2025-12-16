@@ -1,0 +1,9 @@
+<button (click)="toggle()" 
+  class="tool-bar-button" 
+  aria-label="Toggle theme">
+    @if (theme === 'light') {
+      <lucide-angular name="moon" class="size-4"></lucide-angular>
+    } @else if (theme === 'dark') {
+      <lucide-angular name="sun" class="size-4"></lucide-angular>
+    }
+</button>
