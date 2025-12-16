@@ -37,17 +37,20 @@ export class PubSub {
   private topics = new Map<string, Set<PubSubCallback>>();
 
   subscribe<T>(topic: string, cb: PubSubCallback<T>): () => void {
-    if (!this.topics.has(topic)) {
-      this.topics.set(topic, new Set());
-    }
-
+    if (!this.topics.has(topic)) this.topics.set(topic, new Set());
+  
     const subs = this.topics.get(topic)!;
     subs.add(cb);
+    console.log('PubSub.subscribe')
 
-    return () => subs.delete(cb);
+    return () => {
+      console.log('PubSub.unsubscribe');
+      subs.delete(cb);
+    }
   }
 
   publish<T>(topic: string, payload?: T) {
+    console.log('PubSub.publish ' + topic);
     this.topics.get(topic)?.forEach(cb => cb(payload));
   }
 }

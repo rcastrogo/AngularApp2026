@@ -1,10 +1,21 @@
 
 <div class="flex flex-col min-h-screen bg-background dark:bg-background overflow-hidden">
-  <app-app-navbar></app-app-navbar>
-  <main class="flex-1 max-w-5xl mx-auto w-full p-4">
-    <router-outlet/>
-  </main>
-  <app-footer></app-footer>
+  @if (isReady) {
+    <app-app-navbar></app-app-navbar>
+    @if (isLoading) {
+      <div class="h-px w-full overflow-hidden rounded-full bg-red-800 dark:bg-blue-800">
+        <div class="h-full w-full origin-left animate-[progress_2.5s_infinite_linear] bg-background"></div>        
+      </div>
+    } @else {
+      <div class="h-px w-full"></div>
+    }
+    <main class="flex-1 max-w-5xl mx-auto w-full p-4">
+      <router-outlet/>
+    </main>
+    <app-footer></app-footer>   
+  } @else {
+    <app-loader></app-loader>
+  }
 </div>
 
 

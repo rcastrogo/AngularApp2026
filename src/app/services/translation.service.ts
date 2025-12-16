@@ -2,8 +2,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 
-import { MSG_LANGUAGE_CHANGE } from '~/core/messages';
+import { MSG_LANGUAGE_CHANGE, MSG_LOADING_BEGINS, MSG_LOADING_END } from '~/core/messages';
 import { pubSub } from '~/core/pubsub';
+
+export type Language = 'es' | 'en';
 
 /**
  * Service for managing application translations and language settings.
@@ -34,14 +36,14 @@ export class TranslationService {
    * Current language code.
    * @private
    */
-  private lang = 'es';
+  private lang:Language = 'es';
 
   /**
    * Loaded translation objects keyed by language.
    * @private
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private translations: Record<string, any> = {};
+  private translations: Record<string, any> | undefined = undefined;
 
   /**
    * Creates an instance of TranslationService.
@@ -49,7 +51,8 @@ export class TranslationService {
    * 
    */
   constructor() {
-    this.load(this.lang);
+    const saved = localStorage.getItem('lang') as Language;
+    this.setLanguage(saved || 'es');
   }
 
   /**
@@ -57,7 +60,7 @@ export class TranslationService {
    * 
    * @returns The current language code
    */
-  public getLang(): string { 
+  public getLang(): Language { 
     return this.lang;
   }
 
@@ -66,9 +69,11 @@ export class TranslationService {
    * 
    * @param lang - The language code to switch to
    */
-  setLanguage(lang: string) {
+  setLanguage(lang: Language) {
+    if(lang === this.lang && this.translations) return;
     this.lang = lang;
     this.load(lang);
+    localStorage.setItem('lang', lang);
   }
 
   /**
@@ -98,6 +103,7 @@ export class TranslationService {
    * @private
    */
   private load(lang: string) {
+    pubSub.publish(MSG_LOADING_BEGINS);
     this.http
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .get<Record<string, any>>(`/assets/i18n/${lang}/translation.json`)
@@ -105,6 +111,8 @@ export class TranslationService {
       .subscribe((data:Record<string, any>) => {
         this.translations = data;
         pubSub.publish(MSG_LANGUAGE_CHANGE, lang);
+        console.log('Language loaded: ' + lang)
+        pubSub.publish(MSG_LOADING_END);
       });
   }
 }

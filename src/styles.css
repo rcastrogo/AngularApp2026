@@ -147,3 +147,13 @@
 .animate-page-entry {
   animation: slideInRight .8s ease-out forwards;
 }
+
+
+@keyframes progress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+body:has(.fixed.inset-0) {
+  overflow: hidden;
+}

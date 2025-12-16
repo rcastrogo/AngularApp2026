@@ -4,7 +4,7 @@ import { Component, inject } from '@angular/core';
 
 import { LucideAngularModule } from 'lucide-angular'; 
 
-import { TranslationService } from '~/services/translation.service';
+import { TranslationService, Language } from '~/services/translation.service';
 
 
 
@@ -28,7 +28,7 @@ import { TranslationService } from '~/services/translation.service';
         cdkMenu
         class="button z-50 min-w-20 md:min-w-32 items-center overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in zoom-in-95 duration-100"
       >
-        @for (lang of ['es', 'en']; track lang) {
+        @for (lang of availableLangs ; track lang) {
           <button
             cdkMenuItem
             (cdkMenuItemTriggered)="i18n.setLanguage(lang)"
@@ -45,5 +45,8 @@ import { TranslationService } from '~/services/translation.service';
   `,
 })
 export class LanguageSelectorComponent {
+
+  readonly availableLangs: Language[] = ['es', 'en'];
+
   i18n = inject(TranslationService);
 }
