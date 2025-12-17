@@ -21,7 +21,7 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 
  * };
  * ```
  */
-export interface WrappedFetchResponse<T>{
+export interface WrappedFetchResponse<T> {
   success: true;
   message: string;
   data: T;

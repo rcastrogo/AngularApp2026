@@ -51,7 +51,9 @@ export class PubSub {
 
   publish<T>(topic: string, payload?: T) {
     console.log('PubSub.publish ' + topic);
-    this.topics.get(topic)?.forEach(cb => cb(payload));
+    Promise.resolve().then(() => {
+      this.topics.get(topic)?.forEach(cb => cb(payload));
+    });
   }
 }
 

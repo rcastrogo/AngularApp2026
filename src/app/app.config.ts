@@ -5,7 +5,6 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { lucideIconsProvider } from './core/providers/lucide-icons.provider';
 
-
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),

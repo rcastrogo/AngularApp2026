@@ -1,8 +1,8 @@
 
 <div class="flex flex-col min-h-screen bg-background dark:bg-background overflow-hidden">
-  @if (isReady) {
+  @if (isReady()) {
     <app-app-navbar></app-app-navbar>
-    @if (isLoading) {
+    @if (isLoading()) {
       <div class="h-px w-full overflow-hidden rounded-full bg-red-800 dark:bg-blue-800">
         <div class="h-full w-full origin-left animate-[progress_2.5s_infinite_linear] bg-background"></div>        
       </div>

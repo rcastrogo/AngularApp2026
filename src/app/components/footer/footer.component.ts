@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 
 import { LucideAngularModule } from 'lucide-angular';
 
+import { APP_VERSION } from '~/config/constans';
 import { TranslationService } from '~/services/translation.service';
 
 @Component({
@@ -11,5 +12,8 @@ import { TranslationService } from '~/services/translation.service';
   templateUrl: './footer.component.html',
 })
 export class Footer {
-  i18n = inject(TranslationService);
+
+  readonly version = APP_VERSION;
+  readonly i18n = inject(TranslationService);
+
 }

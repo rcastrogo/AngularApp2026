@@ -21,6 +21,7 @@ import { logFetchParams, type HttpMethod, type WrappedFetchResponse, wrappedFetc
  */
 export function createApiRequest<T>() {
   // Internal configuration state
+  let _base: string | undefined;
   let _property: string | undefined;
   let _target: string | undefined;
   let _context: string | undefined;
@@ -30,6 +31,15 @@ export function createApiRequest<T>() {
   let _accessToken: string;
 
   return {
+        /**
+     * Sets the name of wrapped object.
+     *
+     * @param name - Name of target result.
+     */
+    useBase(value: string) {
+      _base = value;
+      return this;
+    },
     /**
      * Sets the name of wrapped object.
      *
@@ -136,7 +146,7 @@ export function createApiRequest<T>() {
      */
     async invoke(): Promise<WrappedFetchResponse<T> | string> {
       if (!_target) throw new Error('Target endpoint not defined. Use .getFrom(), .postTo(), etc.');
-      const { url, payload, method } = logFetchParams(_target, _payload, _method);
+      const { url, payload, method } = logFetchParams((_base || '') + _target, _payload, _method);
       return wrappedFetch<T>(
         () =>
           fetch(url, {
