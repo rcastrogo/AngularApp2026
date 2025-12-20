@@ -1,0 +1,238 @@
+
+<!-- 
+===================================================================================
+Configuración de columnas visibles
+===================================================================================
+-->
+<div class="flex items-center min-w-full border-b p-2 gap-2">
+  @for (col of columns; track col.key) {
+    <label class="flex p-2 gap-2 border rounded-2xl">
+      <input 
+        type="checkbox" 
+        [checked]="visibleColumnIds().has(col.key)"
+        (change)="toggleColumn(col.key)"
+      /> <span> {{ resolveText(col.title) }} </span>
+    </label>
+  }
+</div>
+<div 
+  [attr.data-lng] = "i18n.langVersion()"
+  class="flex gap-1 mt-2 justify-between border-b pb-1 mb-2">
+    <!-- 
+    ===================================================================================
+    Información de registros
+    ===================================================================================
+    -->
+  <div class="text-sm">
+    @if (data().length === 0) {
+      {{ i18n.t('app-table.no-rows', { entity: entity }) }}
+    } @else {
+      {{ i18n.t('app-table.rows', { entity: entity, count: data().length }) }}
+      @if (selected().size > 0) {
+         {{ i18n.t('app-table.selected', { count: selected().size }) }}
+      }
+      -
+      {{ i18n.t('app-table.page', { page: currentPage(), total: totalPages()}) }}
+    }
+  </div>
+    <!-- 
+    ===================================================================================
+    Botones estandart
+    ===================================================================================
+    -->
+  <div class="flex items-end gap-2">
+    <button class="tool-bar-button " (click)="refresh()" [disabled]="waitingForRows">
+      <lucide-icon name="refresh-ccw" />
+    </button>
+    <button class="tool-bar-button " (click)="insert()">
+      <lucide-icon name="plus" />
+    </button>
+    <button class="tool-bar-button " (click)="deleteSelected()" [disabled]="selected().size === 0">
+      <lucide-icon name="trash-2" />
+    </button>
+    <button class="tool-bar-button " (click)="editSelected()" [disabled]="selected().size !== 1">
+      <lucide-icon name="edit" />
+    </button>
+    <!-- 
+    ===================================================================================
+    Botones dinámicos
+    ===================================================================================
+    -->
+    @for (btn of buttons; track btn.key) {
+      @if (showAsButton(btn)) {
+        <button
+          class="tool-bar-button "
+          [disabled]="!isButtonEnabled(btn)"
+          (click)="btn.onClick?.()"
+          [attr.title]="resolveText(btn.label)"
+        >
+          @if (btn.icon) {
+            <lucide-icon [name]="btn.icon" />
+            <span class="hidden">
+              {{ resolveText(btn.label) }}
+            </span>
+          } @else {
+            {{ resolveText(btn.label) }}
+          }
+        </button>
+      }
+    }
+  </div>
+  <!-- 
+  ===================================================================================
+  Botones navegación
+  ===================================================================================
+  -->
+  <div class="flex items-center gap-1">
+    <button class="tool-bar-button " (click)="firstPage()" [disabled]="currentPage() === 1">
+      <lucide-icon name="chevrons-left" />
+    </button>
+    <button class="tool-bar-button " (click)="prevPage()" [disabled]="currentPage() === 1">
+      <lucide-icon name="chevron-left" />
+    </button>
+    <input
+      type="text"
+      class="w-14 h-9 text-center border-accent rounded"
+      [value]="currentPage()"
+      (change)="goToPage($event)"
+      [min]="1"
+      [max]="totalPages()"
+    />
+    <button class="tool-bar-button " (click)="nextPage()" [disabled]="currentPage() === totalPages()">
+      <lucide-icon name="chevron-right" />
+    </button>
+    <button class="tool-bar-button " (click)="lastPage()" [disabled]="currentPage() === totalPages()">
+      <lucide-icon name="chevrons-right" />
+    </button>
+    <!-- 
+    ===================================================================================
+    Menú contextual
+    ===================================================================================
+    -->
+
+  </div>
+</div>
+
+<!-- 
+=========================================================================================================
+TABLE 
+=========================================================================================================
+-->
+<div class="overflow-x-auto">
+  <table class="min-w-full divide-y divide-gray-200">
+    <!-- 
+    =====================================================================================================
+    Cabeceras
+    =====================================================================================================
+    -->
+    <thead class="">
+      <tr>
+        <th class="w-0 py-2">
+          <div class="flex items-center justify-center h-full">
+            <input
+              type="checkbox"
+              class="w-4 h-4 accent-gray-400  dark:accent-blue-700 cursor-pointer"
+              [checked]="selected().size === sortedRows().length && sortedRows().length > 0"
+              (change)="selectAll($event.target.checked)"
+              [indeterminate]="
+                selected().size > 0 &&
+                selected().size < sortedRows().length
+              "
+            />            
+          </div>
+        </th>
+        @for (col of visibleColumns(); track col.key) {
+          <th
+            [attr.data-selected]="sortedColumn() === col.key || null"
+            [ngClass]="[
+              'py-2 select-none',              
+              col.sorter ? 'cursor-pointer' : '',
+              col.sorter ? 'hover:text-blue-300' : '',
+              col.sorter ? 'hover:dark:text-yellow-300' : '',
+              col.className || ''
+            ]"
+            (click)="toggleSort(col)"
+          >
+            <div 
+              [ngClass]="[           
+                col.sorter ? 'flex items-center mr-2 gap-1.5' : '',
+              ]"
+              >
+              <div class="flex-1 text-left">{{ resolveText(col.title) }}</div>
+              @if (sortedColumn() === col.key) {
+                @if(sortDirection() === 'desc'){
+                  <lucide-icon class="size-4" name="chevron-up" />                
+                } @else if(sortDirection() === 'asc') {
+                  <lucide-icon class="size-4" name="chevron-down" />
+                } @else {
+                  <div class="size-4"></div>
+                }
+              } @else if(col.sorter) {
+                <div class="size-4"></div>  
+              }
+              @if (pageRows().length > 0 && col.hideSeachButton !== true) {
+                 <lucide-icon class="size-4" name="menu" />
+              }
+            </div>
+          </th>
+        }
+      </tr>
+    </thead>
+    <!-- 
+    =====================================================================================================
+    Filas
+    =====================================================================================================
+    -->
+    <tbody>
+      @if (waitingForRows) {
+
+      } @else {
+        @for (row of pageRows(); track row.id; let i = $index) {
+          <tr
+            [attr.data-selected]="selected().has(row.id) || null"
+            class="
+              transition-colors
+              odd:bg-white even:bg-gray-100
+              dark:odd:bg-slate-900 dark:even:bg-slate-700/50
+              hover:bg-gray-200 dark:hover:bg-slate-800
+              hover:data-selected:bg-gray-200 dark:data-selected:hover:bg-slate-800
+              data-selected:bg-blue-100
+              dark:data-selected:bg-blue-900/40"
+          >
+            <td class="w-0 p-2">
+              <div class="flex items-center justify-center h-full">
+                <input
+                  type="checkbox"
+                  class="w-4 h-4 accent-gray-400 dark:accent-blue-700 cursor-pointer"
+                  [checked]="selected().has(row.id)"
+                  (change)="toggleRow(row.id, $event.target.checked)"
+                />
+              </div>
+            </td>
+
+            @for (col of visibleColumns(); track col.key) {
+              @if (col.cellTemplate) {
+                <td 
+                  [ngClass]="[col.className || '']"
+                  >
+                  <ng-container
+                    *ngTemplateOutlet="
+                      col.cellTemplate;
+                      context: { $implicit: row, column: col }
+                    "
+                  />                  
+                </td>
+              } @else {
+                <td 
+                  [ngClass]="[col.className || '']"
+                  >
+                  {{ resolveCellValue(col, row) }}
+                </td>
+              }
+            }
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>

@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { Localizable } from "~/components/app-table/app-table.component";
+import { TranslationService } from "~/services/translation.service";
+
 /**
  * Returns a sanitized object from a FormData instance, trimming whitespace
  * from string values and preserving file entries as-is.
@@ -50,6 +53,17 @@ function createMap(array: any[], idKey = 'id', nameKey = 'name'): { [k: string]:
   return Object.fromEntries(array.map(item => [item[idKey], getValueByPath(item , nameKey)]));
 }
 
+/**
+ * Retrieves a value from an object using a dot-notation path string.
+ * @param item - The object to retrieve the value from.
+ * @param path - A dot-separated string path (e.g., 'user.profile.name'). If empty, returns the string representation of the item.
+ * @returns The value at the specified path, or `undefined` if the path is invalid or any intermediate value is null or not an object.
+ * @example
+ * const obj = { user: { name: 'John', age: 30 } };
+ * getValueByPath(obj, 'user.name'); // 'John'
+ * getValueByPath(obj, 'user.age'); // 30
+ * getValueByPath(obj, 'user.email'); // undefined
+ */
 function getValueByPath (item: any, path: string): any {
   if (!path) return item.toString();
   const parts = path.split('.');
@@ -70,17 +84,79 @@ export type NestedPaths<T> = T extends object
   }[keyof T]
   : '';
 
+/**
+ * Compares two strings using locale-aware comparison with accent sensitivity and numeric ordering.
+ * @param a - The first string to compare
+ * @param b - The second string to compare
+ * @returns A negative number if a comes before b, a positive number if a comes after b, or 0 if they are equal
+ */
 function accentNumericComparer(a: string, b: string){
   return a.localeCompare(b, undefined, { sensitivity: 'accent', numeric: true });
 }
 
+/**
+ * Normalizes a string by removing diacritical marks and converting to lowercase.
+ * 
+ * @param value - The string to normalize
+ * @returns The normalized string with diacritical marks removed and converted to lowercase
+ * 
+ * @example
+ * normalizeNFD('Café') // returns 'cafe'
+ * normalizeNFD('Naïve') // returns 'naive'
+ */
 const normalizeNFD = (value: string) => {
   return value.normalize('NFD')
               .replace(/[\u0300-\u036f]/g, '')
               .toLowerCase();
 }
 
-const formatNumber = (value: number) => new Intl.NumberFormat('es').format(value);
+/**
+ * Formats a number according to the specified locale.
+ * @param value - The number to format.
+ * @param lng - The locale language code. Defaults to 'es' (Spanish).
+ * @returns A formatted string representation of the number.
+ */
+const formatNumber = (value: number, lng = 'es') => new Intl.NumberFormat(lng).format(value);
+
+/**
+ * Resolves a display string from a Localizable value.
+ *
+ * If the provided value is already a plain string, it is returned unchanged.
+ * Otherwise the value is treated as a Localizable object (expected to contain
+ * a `key` property) and the translation service is used to look up and return
+ * the corresponding localized string.
+ *
+ * @param value - The value to resolve. Can be a plain string or a Localizable
+ *   object (e.g. `{ key: string }`).
+ * @param i18n - The translation service used to translate keys. The function
+ *   calls `i18n.t(value.key, params)` when `value` is not a string.
+ * @param params - Optional interpolation parameters passed to the translation
+ *   service (a map of placeholder names to string or number values).
+ *
+ * @returns The resolved string: either the original string value or the
+ *   translation returned by the translation service.
+ *
+ * @remarks
+ * - This function is synchronous and forwards any errors thrown by the
+ *   translation service.
+ * - The exact shape of the Localizable type and the behavior of `i18n.t` are
+ *   defined elsewhere; this helper assumes `value` has a `key: string` when it
+ *   is not a string.
+ *
+ * @example
+ * // value is a plain string
+ * resolveText("Direct text", i18n);
+ *
+ * @example
+ * // value is a Localizable object with interpolation params
+ * resolveText({ key: "greeting" }, i18n, { name: "Alice" });
+ */
+const resolveText = ( 
+  value: Localizable, i18n: TranslationService, params?: Record<string, string | number>
+) => {
+  if (typeof value === 'string') return value;
+  return i18n.t(value.key, params);
+}
 
 export {
   getSafeFormData,
@@ -88,5 +164,6 @@ export {
   accentNumericComparer,
   normalizeNFD,
   getValueByPath,
-  formatNumber
+  formatNumber,
+  resolveText
 };

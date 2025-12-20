@@ -6,13 +6,21 @@
     },
     "app-name": "Angular App",
     "footer-text": "Rafael Castro Gómez, 2025",
+    "app-table": {
+        "no-rows": "{{entity}}. No hay registros.",
+        "rows": "{{entity}}. {{count}} elemento/s",
+        "selected": "({{count}} selecionado/s)",
+        "page": "Página {{page}}/{{total}}"
+    },
     "general": {
         "action": {
             "accept": "Aceptar",
             "close": "Cerrar",
             "cancel": "Cancelar",
             "loading": "Cargando...",
-            "loading-data": "Cargando datos..."
+            "loading-data": "Cargando datos...",
+            "search" : "Buscar",
+            "export" : "Exportar"
         },
         "noResultsInTable": "No hay resultados",
         "suggest_results_one": "{{count}} resultado",
@@ -145,6 +153,17 @@
                 "title": "Opciones Avanzadas",
                 "body": "Configura características más técnicas, integraciones o comportamiento interno del sistema. Estas opciones están pensadas para usuarios avanzados o administradores."
             }
+        }
+    },
+    "country-table": {
+        "entity-name": "Países",
+        "columns": {
+            "id" : "Id",
+            "name": "Nombre",
+            "capital": "Capital",
+            "region": "Región",
+            "population": "Población",
+            "flag": "Bandera"
         }
     }
 }

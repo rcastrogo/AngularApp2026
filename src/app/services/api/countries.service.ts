@@ -26,8 +26,8 @@ export class CountriesService {
     return createApiRequest<Country[]>()
       .useBase(BASE_ENDPOINT)
       .useLog('Fetching all countries')
-      .useTransform(countries => countries.map((c, i) => this.#mapCountry(c, i)))
-      .getFrom('all?fields=name,capital,region,population,flags,cca2')
+      .useTransform(countries => countries.map((c, i) => this.mapCountry(c, i)))
+      .getFrom('all?fields=name,capital,region,population,flags,cca2')  
       .invoke();
   }
 
@@ -35,14 +35,14 @@ export class CountriesService {
     return createApiRequest<Country[]>()
       .useBase(BASE_ENDPOINT)
       .useLog(`Searching country: ${term}`)
+      .useTransform(countries => countries.map((c, i) => this.mapCountry(c, i)))      
       .getFrom(`name/${term}`)
-      .useTransform(countries => countries.map((c, i) => this.#mapCountry(c, i)))
       .invoke();
   }
 
  
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  #mapCountry(c: any, index: number): Country {
+  private mapCountry(c: any, index: number): Country {
     return {
       id: index + 1,
       cca2: c.cca2 || '',

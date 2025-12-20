@@ -17,7 +17,7 @@ module.exports = defineConfig([
       ...tseslint.configs.recommended,
       ...tseslint.configs.stylistic,
       ...angular.configs.tsRecommended,
-      eslintConfigPrettier, // Siempre al final para desactivar reglas de formato de ESLint
+      // eslintConfigPrettier,
     ],
     processor: angular.processInlineTemplates,
     rules: {
@@ -66,7 +66,7 @@ module.exports = defineConfig([
     extends: [
       ...angular.configs.templateRecommended,
       ...angular.configs.templateAccessibility,
-      eslintConfigPrettier, // También aquí para los templates
+      eslintConfigPrettier,
     ],
     rules: {},
   }
