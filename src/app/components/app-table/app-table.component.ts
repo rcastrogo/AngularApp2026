@@ -1,3 +1,4 @@
+
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -11,17 +12,31 @@ import {
   OnInit,
 } from '@angular/core';
 
+
 import { LucideAngularModule } from 'lucide-angular';
 
 import { storage } from '~/core/storageUtil';
-import { accentNumericComparer, getValueByPath, resolveText } from '~/core/utils';
-import { TranslationService } from '~/services/translation.service';
+import { accentNumericComparer, getUniqueValues, getValueByPath } from '~/core/utils';
+import { Localizable, TranslationService } from '~/services/translation.service';
+
+import { TableColumnFilterMenuComponent } from "./app-table-column-filter.component";
+import { TableMenuComponent } from "./app-table-menu.component";
+
+export const ACTIONS = {
+  SELECT_ALL: 'select-all',
+  CLEAR_ALL: 'clear-all',
+  TOGGLE_COLUMN_PREFIX: 'toggle-column-',
+  PAGE_SIZE_PREFIX: 'page-size-',
+  INVERT_SELECTION: 'invert-selection',
+  CHOOSE_SELECTION: 'show_only_selection',
+  NEW: 'new',
+  DELETE: 'delete',
+  EDIT: 'edit',
+} as const;
 
 export interface Identifiable {
   id: string | number;
 }
-
-export type Localizable = string | { key: string };
 
 export interface ActionHandlers<T> {
   onCreate?: (callback: (item: T) => void) => void;
@@ -41,8 +56,7 @@ export interface Column<T extends Identifiable> {
   title: Localizable;
   isVisible?: boolean;
   className?: string;
-  sorter?: (a: T, b: T) => number;
-  //sorter?: keyof T | ((a: T, b: T) => number) | NestedPaths<T> | string;  
+  sorter?: keyof T | ((a: T, b: T) => number); // | NestedPaths<T> | string;  
   cellTemplate?: TemplateRef<CellContext<T>>;
   map?: (id: number) => string;
   accessor?: keyof T | ((item: T) => string | number | boolean | null);
@@ -59,6 +73,12 @@ export interface ActionButton {
   enabledWhen?: (selected: Set<string | number>) => boolean;
 }
 
+const TABLE_STORAGE_KEY = 'app-table';
+const VISIBLE_COLUMNS = 'visibleColumns';
+const buildStorageKey = (base:string, name: string) => {
+  return TABLE_STORAGE_KEY + '-' + base + '-' + name;
+}
+
 @Component({
   selector: 'app-table',
   standalone: true,
@@ -66,7 +86,9 @@ export interface ActionButton {
   imports: [
     CommonModule,
     LucideAngularModule,
-  ],
+    TableMenuComponent,
+    TableColumnFilterMenuComponent
+],
   templateUrl: './app-table.component.html',
 })
 export class TableComponent<T extends Identifiable> implements OnInit {
@@ -77,6 +99,7 @@ export class TableComponent<T extends Identifiable> implements OnInit {
   // =============================================================================
   // Parámtros de entrada
   // =============================================================================
+  @Input() key = 'key';
   @Input() entity = 'Items';
   @Input() pageSizeInitial = 10;
   @Input() enableDoubleClickEdit = false;
@@ -99,11 +122,13 @@ export class TableComponent<T extends Identifiable> implements OnInit {
   readonly sortedColumn = signal<string | null>(null);
   readonly sortDirection = signal<'asc' | 'desc' | null>(null);
   readonly visibleColumnIds = signal<Set<string>>(new Set());
-  // =============================================================================
+  // =================================================================================
   // Inicialización
-  // =============================================================================
+  // =================================================================================
   ngOnInit(): void {
-    const savedColumns = storage.readValue<string[]>('app-table-xxx');
+    console.log(this.key);
+    const visibleColumnsKey = buildStorageKey(this.key, VISIBLE_COLUMNS);
+    const savedColumns = storage.readValue<string[]>(visibleColumnsKey);
     this.visibleColumnIds.set(
       new Set(
         savedColumns?.length
@@ -119,16 +144,37 @@ export class TableComponent<T extends Identifiable> implements OnInit {
   // Persistencia
   // =============================================================================
   private readonly _persist = effect(() => {
-    storage.writeValue('app-table-xxx', Array.from(this.visibleColumnIds()));
+    const visibleColumnsKey = buildStorageKey(this.key, VISIBLE_COLUMNS);
+    storage.writeValue( visibleColumnsKey, Array.from(this.visibleColumnIds()) );
   });
 
+  // =============================================================
+  // Botones
+  // =============================================================
+  readonly actionButtons = computed(() =>
+    this.buttons.filter(
+      btn => !btn.show || btn.show === 'button' || btn.show === 'both'
+    )
+  );
+  isButtonEnabled = (btn: ActionButton) => btn.enabledWhen ? btn.enabledWhen(this.selected()) : true;
+  handleOnButtonClick = (item: ActionButton) => {
+    if (item.onClick) {
+      item.onClick();
+      return;
+    }
+    this.onAction(item.key);
+  }
+
+  // =============================================================================
+  // Columnas visibles
+  // =============================================================================
   readonly visibleColumns = computed(() => {
     const visibleSet = this.visibleColumnIds();
     return this.columns
       .filter(col => visibleSet.has(col.key));
   });
 
-  toggleColumn(columnId: string) {
+  handleToggleColumn(columnId: string) {
     this.visibleColumnIds.update(set => {
       const newSet = new Set(set);
       if (newSet.has(columnId)) {
@@ -139,7 +185,9 @@ export class TableComponent<T extends Identifiable> implements OnInit {
       return newSet;
     });
   }
-
+  // =============================================================================
+  // Ordenación de columnas
+  // =============================================================================
   readonly sortedRows = computed(() => {
     const colKey = this.sortedColumn();
     const dir = this.sortDirection();
@@ -185,6 +233,12 @@ export class TableComponent<T extends Identifiable> implements OnInit {
         : sorterFn(b, a)
     );
   });
+  // =============================================================================
+  // Paginación
+  // =============================================================================
+  handlePageSizeCange(value: string) {
+    this.pageSize.set((~~value) || 5);
+  }
 
   readonly totalPages = computed(() =>
     Math.max(1, Math.ceil(this.sortedRows().length / this.pageSize()))
@@ -209,6 +263,19 @@ export class TableComponent<T extends Identifiable> implements OnInit {
     this.currentPage.set(1);
   }
 
+  firstPage = () => this.currentPage.set(1);
+  lastPage = () => this.currentPage.set(this.totalPages());
+  prevPage = () => this.currentPage.update(p => Math.max(1, p - 1));
+  nextPage = () => this.currentPage.update(p => Math.min(this.totalPages(), p + 1));
+  goToPage(e: Event) {
+    const value = Number((e.target as HTMLInputElement).value);
+    if (value >= 1 && value <= this.totalPages()) {
+      this.currentPage.set(value);
+    }
+  }
+  // =============================================================================
+  // Selección de registros
+  // =============================================================================
   toggleRow(id: string | number, checked: boolean) {
     this.selected.update(prev => {
       const next = new Set(prev);
@@ -228,17 +295,17 @@ export class TableComponent<T extends Identifiable> implements OnInit {
     }
   }
 
-  firstPage = () => this.currentPage.set(1);
-  lastPage = () => this.currentPage.set(this.totalPages());
-  prevPage = () => this.currentPage.update(p => Math.max(1, p - 1));
-  nextPage = () => this.currentPage.update(p => Math.min(this.totalPages(), p + 1));
-  goToPage(e: Event) {
-    const value = Number((e.target as HTMLInputElement).value);
-    if (value >= 1 && value <= this.totalPages()) {
-      this.currentPage.set(value);
-    }
+  handleInvertSelection() {
+    console.log('handleInvertSelection');
   }
 
+  handleShowOnlySelected() {
+    console.log('handleShowOnlySelected');
+  }
+
+  // =============================================================================
+  // Acciones
+  // =============================================================================
   refresh() {
     this.selected.set(new Set());
     this.actionHandlers?.onCustomAction?.('reload');
@@ -275,6 +342,20 @@ export class TableComponent<T extends Identifiable> implements OnInit {
     });
   }
 
+  onAction(action: string) {
+    if (action == ACTIONS.SELECT_ALL) this.selectAll(true);
+    else if (action == ACTIONS.CLEAR_ALL) this.selectAll(false);
+    else if (action == ACTIONS.INVERT_SELECTION) this.handleInvertSelection();
+    else if (action == ACTIONS.CHOOSE_SELECTION) this.handleShowOnlySelected();
+    else if (action == ACTIONS.NEW) this.insert();
+    else if (action == ACTIONS.DELETE) this.deleteSelected();
+    else if (action == ACTIONS.EDIT) this.editSelected();
+    else if (action.startsWith(ACTIONS.PAGE_SIZE_PREFIX)) this.handlePageSizeCange(action.split('-')[2]);
+    else if (action.startsWith(ACTIONS.TOGGLE_COLUMN_PREFIX)) this.handleToggleColumn(action.split('-')[2]);
+    else this.actionHandlers?.onCustomAction?.(action, this.selected());
+    // console.log('Action triggered:', action);
+  }
+
   resolveCellValue(column: Column<T>, item: T): string | number | boolean | null {
     if (column.accessor) {
       if (typeof column.accessor === "function") {
@@ -289,10 +370,17 @@ export class TableComponent<T extends Identifiable> implements OnInit {
     return getValueByPath(item, column.key);
   };
 
-  showAsButton = (btn: ActionButton) => !btn.show || btn.show === 'button' || btn.show === 'both';
-  isButtonEnabled = (btn: ActionButton) => btn.enabledWhen ? btn.enabledWhen(this.selected()) : true;
-  resolveText = (value: Localizable, params?: Record<string, string | number>) => resolveText(value, this.i18n, params);
-
+  getUniqueValues = (column: Column<T>) => {
+    // ===============================================================================
+    // Recuperar descripciones de los códigos
+    // ===============================================================================
+    // if (column.map) {
+    //   const ids = getUniqueValues(datos as [], column.key);
+    //   acc[column.key] = ids.map((id) => column.map!(~~id)).sort(accentNumericComparer);
+    //   return acc;
+    // }
+    return getUniqueValues(this.data() as [], column.key).sort(accentNumericComparer);
+  }
 
 }
 

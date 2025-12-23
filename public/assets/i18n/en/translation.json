@@ -10,7 +10,16 @@
         "no-rows": "{{entity}}. No records found.",
         "rows": "{{entity}}. {{count}} item/s",
         "selected": "({{count}} selected)",
-        "page": "Page {{page}}/{{total}}"
+        "page": "Page {{page}}/{{total}}",
+        "menu": {
+            "select-count": "{{count}} selected",
+            "select-all": "Select all",
+            "select-clear": "Clear selection",
+            "select-invert": "Invert selection",
+            "select-set": "Selected only",
+            "columns": "Columns",
+            "rows-per-page": "Rows per page"
+        }
     },
     "general": {
         "action": {

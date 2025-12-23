@@ -1,8 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Localizable } from "~/components/app-table/app-table.component";
-import { TranslationService } from "~/services/translation.service";
-
 /**
  * Returns a sanitized object from a FormData instance, trimming whitespace
  * from string values and preserving file entries as-is.
@@ -118,44 +115,15 @@ const normalizeNFD = (value: string) => {
  */
 const formatNumber = (value: number, lng = 'es') => new Intl.NumberFormat(lng).format(value);
 
+
 /**
- * Resolves a display string from a Localizable value.
- *
- * If the provided value is already a plain string, it is returned unchanged.
- * Otherwise the value is treated as a Localizable object (expected to contain
- * a `key` property) and the translation service is used to look up and return
- * the corresponding localized string.
- *
- * @param value - The value to resolve. Can be a plain string or a Localizable
- *   object (e.g. `{ key: string }`).
- * @param i18n - The translation service used to translate keys. The function
- *   calls `i18n.t(value.key, params)` when `value` is not a string.
- * @param params - Optional interpolation parameters passed to the translation
- *   service (a map of placeholder names to string or number values).
- *
- * @returns The resolved string: either the original string value or the
- *   translation returned by the translation service.
- *
- * @remarks
- * - This function is synchronous and forwards any errors thrown by the
- *   translation service.
- * - The exact shape of the Localizable type and the behavior of `i18n.t` are
- *   defined elsewhere; this helper assumes `value` has a `key: string` when it
- *   is not a string.
- *
- * @example
- * // value is a plain string
- * resolveText("Direct text", i18n);
- *
- * @example
- * // value is a Localizable object with interpolation params
- * resolveText({ key: "greeting" }, i18n, { name: "Alice" });
+ * Extracts unique values from an array of objects based on a specified key.
+ * @param data - The array of objects to process
+ * @param key - The property key to extract unique values from
+ * @returns An array of unique string values sorted in their original order of appearance
  */
-const resolveText = ( 
-  value: Localizable, i18n: TranslationService, params?: Record<string, string | number>
-) => {
-  if (typeof value === 'string') return value;
-  return i18n.t(value.key, params);
+function getUniqueValues(data:[], key: string) {
+  return [...new Set(data.map((row) => String((row as any)[key])))];
 }
 
 export {
@@ -165,5 +133,5 @@ export {
   normalizeNFD,
   getValueByPath,
   formatNumber,
-  resolveText
+  getUniqueValues,
 };

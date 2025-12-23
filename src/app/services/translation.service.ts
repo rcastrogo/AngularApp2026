@@ -6,6 +6,7 @@ import { MSG_LANGUAGE_CHANGE, MSG_LOADING_BEGINS, MSG_LOADING_END } from '~/core
 import { pubSub } from '~/core/pubsub';
 
 export type Language = 'es' | 'en';
+export type Localizable = string | { key: string };
 
 /**
  * Service for managing application translations and language settings.
@@ -120,6 +121,17 @@ export class TranslationService {
     return value.replace(/\{\{(\w+)\}\}/g, (_, param) => {
       return param in params ? String(params[param]) : `{{${param}}}`;
     });
+  }
+
+  /**
+   * Resolves a translatable value to its translated string representation.
+   * @param value - The value to resolve, either a string key or a Localizable object containing a key property.
+   * @param params - Optional record of parameters to interpolate into the translated string.
+   * @returns The translated string with any parameters interpolated.
+   */
+  resolve(value: Localizable, params?: Record<string, string | number>): string {
+    const key = (typeof value === 'string') ? value : value.key;
+    return this.t(key, params);
   }
 
   /**

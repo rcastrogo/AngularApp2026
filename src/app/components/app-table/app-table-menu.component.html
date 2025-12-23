@@ -1,0 +1,118 @@
+<div class="inline-block">
+
+    <button [cdkMenuTriggerFor]="mainMenu" class="flex tool-bar-button">
+      <lucide-icon name="menu" class="size-4"></lucide-icon>
+    </button>
+
+    <ng-template #mainMenu>
+      <div cdkMenu class="bg-white dark:bg-gray-800 border rounded shadow-lg w-56 p-2 flex flex-col gap-1 text-sm">
+        
+        @if (selectedRows().size) {
+          <div class="font-semibold px-2 flex">
+            {{ i18n.resolve({key : 'app-table.menu.select-count'}, {count : selectedRows().size}) }}
+          </div>
+          <hr class="border-gray-300 dark:border-gray-600 my-1" />
+        }
+
+        @if(selectedRows().size < rowsCount()){
+          <button cdkMenuItem class="flex px-2 py-2 gap-2 items-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+            (cdkMenuItemTriggered)="handleAction(ACTIONS.SELECT_ALL)">
+            <lucide-icon name="list-check" class="size-4"></lucide-icon>
+            <span>{{ i18n.resolve('app-table.menu.select-all') }}</span> 
+          </button>
+        }
+
+        @if(selectedRows().size > 0){
+          <button cdkMenuItem class="flex px-2 py-2 gap-2 items-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+            (cdkMenuItemTriggered)="handleAction(ACTIONS.CLEAR_ALL)">
+            <lucide-icon name="square-x" class="size-4"></lucide-icon>
+            <span>{{ i18n.resolve('app-table.menu.select-clear') }}</span>
+          </button>
+        }
+
+        @if(selectedRows().size > 0 && selectedRows().size < rowsCount()){
+          <button cdkMenuItem class="flex px-2 py-2 gap-2 items-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700" 
+            (cdkMenuItemTriggered)="handleAction(ACTIONS.INVERT_SELECTION)">
+            <lucide-icon name="repeat" class="size-4"></lucide-icon>
+            <span>{{ i18n.resolve('app-table.menu.select-invert') }}</span>
+          </button>
+        }
+
+        @if(selectedRows().size > 0 && selectedRows().size < rowsCount()){
+          <button cdkMenuItem class="flex px-2 py-2 gap-2 items-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700" 
+            (cdkMenuItemTriggered)="handleAction(ACTIONS.CHOOSE_SELECTION)">
+            <lucide-icon name="list-filter" class="size-4"></lucide-icon>
+            <span>{{ i18n.resolve('app-table.menu.select-set') }}</span>
+          </button>
+        }
+        
+        <hr class="border-gray-300 dark:border-gray-600 my-1" />
+
+        <button cdkMenuItem [cdkMenuTriggerFor]="columnSubmenu"
+          class="group flex px-2 py-2 gap-2 items-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+          <lucide-icon name="settings" class="size-4"></lucide-icon>
+          <span class="flex-1 text-left">{{ i18n.resolve('app-table.menu.columns') }}</span>
+          <lucide-icon name="chevron-right" class="size-4 opacity-50"></lucide-icon>            
+        </button>
+        <hr class="border-gray-300 dark:border-gray-600 my-1" />
+
+        @for (item of menuButtons(); track item.key) {
+          <button 
+            cdkMenuItem 
+            [disabled]="!isButtonEnabled(item)"
+            (cdkMenuItemTriggered)="handleOnMenuItem(item)"
+            class="
+              group flex px-2 py-2 gap-2 items-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors 
+              disabled:opacity-50 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent
+              ">
+            @if (item.icon) {
+              <lucide-icon [name]="item.icon" class="size-4"></lucide-icon>
+            }
+            <span class="flex-1 text-left">{{ i18n.resolve(item.label) }}</span>
+          </button>            
+        }
+
+        @if (menuButtons().length > 0) {
+          <hr class="border-gray-300 dark:border-gray-600 my-1" />
+        }
+        
+        <div class="">
+          <div class="py-1.5 mb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b border-slate-50 dark:border-slate-800">
+            {{ i18n.resolve('app-table.menu.rows-per-page') }}
+          </div>
+          <div class="flex items-stretch gap-2">
+            @for (value of [5, 10, 25, 50, 100]; track value) {
+              <button 
+                [ngClass]="[
+                  'inline-block w-10 h-8 rounded text-center text-sm border border-gray-300
+                  focus:z-10 focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500
+                  bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200  hover:bg-gray-100 dark:hover:bg-gray-700',              
+                  pageSize() === value ? 'bg-gray-800! dark:bg-gray-400! text-white!' : '',
+                ]"
+                cdkMenuItem (cdkMenuItemTriggered)="handleAction(ACTIONS.PAGE_SIZE_PREFIX + value)">
+                  {{value}}
+              </button>
+            }             
+          </div>        
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #columnSubmenu>
+      <div cdkMenu class="bg-white dark:bg-gray-800 border rounded shadow-lg w-40 p-2 flex flex-col gap-1 text-sm">
+        @for (col of columns(); track col.key) {
+          <button cdkMenuItem 
+            (cdkMenuItemTriggered)="handleToggleColumn(col.key);"
+            class="w-full flex items-center gap-3 px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
+            @if(visibleColumnIds().has(col.key)){
+              <lucide-icon name="check" class="size-4 text-foreground dark:text-foreground"></lucide-icon> 
+            } @else {
+              <div class="size-4"></div>
+            }                        
+            <span class="flex-1 text-left">{{ i18n.resolve(col.title) }}</span>
+          </button>
+        }
+      </div>
+    </ng-template>
+
+</div>

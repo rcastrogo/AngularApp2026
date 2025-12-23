@@ -33,6 +33,7 @@ import { TranslationService } from '~/services/translation.service';
       </ng-template>
 
       <app-table
+        [key]="'countries'"
         [entity]="getEntityName()"
         [columns]="columns"
         [buttons]="buttons"
@@ -52,7 +53,7 @@ export class CountryTableComponent implements OnInit {
   countries = signal<Country[]>([]);
   isLoading = signal(false);
 
-  columns : Column<Country>[] = [];
+  columns: Column<Country>[] = [];
   actions: ActionHandlers<Country> = {};
   buttons: ActionButton[] = [];
 
@@ -63,9 +64,9 @@ export class CountryTableComponent implements OnInit {
     key: 'export',
     label: { key: 'general.action.export' },
     icon: 'download',
-    show: 'both',
+    show: 'menu',
     enabledWhen: selected => selected.size > 0,
-    onClick: () => alert('Export')
+    onClick: () => alert('onclick Export')
   };
 
   btnSearch: ActionButton = {
@@ -79,7 +80,9 @@ export class CountryTableComponent implements OnInit {
     key: 'settings',
     label: 'Config',
     icon: 'settings',
-    show: 'both'
+    show: 'menu',
+    enabledWhen: selected => selected.size == 1,
+    onClick: () => alert('onclick Config')
   };
 
   async ngOnInit() {
@@ -120,7 +123,7 @@ export class CountryTableComponent implements OnInit {
         key: 'id',
         title: 'Id',
         className: 'w-12 text-center ',
-        sorter: (a, b) => a.id - b.id
+        sorter: 'id'
       },
       {
         key: 'Id x 2',
@@ -153,6 +156,7 @@ export class CountryTableComponent implements OnInit {
         accessor: (p) => formatNumber(p.population, this.i18n.getLang()),
         className: 'w-8 text-right ',
         sorter: (a, b) => a.population - b.population,
+        hideValueSelection: true,
       },
       {
         key: 'flag',
@@ -166,6 +170,7 @@ export class CountryTableComponent implements OnInit {
 
 
   private handleCreate: ActionHandlers<Country>['onCreate'] = (done) => {
+    alert('handleCreate');
     const newCountry: Country = {
       id: Date.now(),
       name: 'Nuevo País',
@@ -181,6 +186,7 @@ export class CountryTableComponent implements OnInit {
   };
 
   private handleDelete: ActionHandlers<Country>['onDelete'] = (ids, done) => {
+    alert('handleDelete');
     this.countries.update(list =>
       list.filter(c => !ids.includes(c.id))
     );
@@ -188,6 +194,7 @@ export class CountryTableComponent implements OnInit {
   };
 
   private handleEdit: ActionHandlers<Country>['onEdit'] = (country, done) => {
+    alert('handleEdit');
     const updated: Country = {
       ...country,
       name: country.name + ' (editado)'
@@ -204,10 +211,9 @@ export class CountryTableComponent implements OnInit {
     if (action === 'reload') {
       this.fetchCountries();
     }
+    alert('handleCustomAction: ' + action);
   };
 
-  getEntityName() {
-    return this.i18n.t('country-table.entity-name');
-  }
+  getEntityName = () => this.i18n.t('country-table.entity-name');
 
 }

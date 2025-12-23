@@ -1,28 +1,12 @@
 
-<!-- 
-===================================================================================
-Configuración de columnas visibles
-===================================================================================
--->
-<div class="flex items-center min-w-full border-b p-2 gap-2">
-  @for (col of columns; track col.key) {
-    <label class="flex p-2 gap-2 border rounded-2xl">
-      <input 
-        type="checkbox" 
-        [checked]="visibleColumnIds().has(col.key)"
-        (change)="toggleColumn(col.key)"
-      /> <span> {{ resolveText(col.title) }} </span>
-    </label>
-  }
-</div>
 <div 
   [attr.data-lng] = "i18n.langVersion()"
   class="flex gap-1 mt-2 justify-between border-b pb-1 mb-2">
-    <!-- 
-    ===================================================================================
-    Información de registros
-    ===================================================================================
-    -->
+  <!-- 
+  ===================================================================================
+  Información de registros
+  ===================================================================================
+  -->
   <div class="text-sm">
     @if (data().length === 0) {
       {{ i18n.t('app-table.no-rows', { entity: entity }) }}
@@ -35,11 +19,11 @@ Configuración de columnas visibles
       {{ i18n.t('app-table.page', { page: currentPage(), total: totalPages()}) }}
     }
   </div>
-    <!-- 
-    ===================================================================================
-    Botones estandart
-    ===================================================================================
-    -->
+  <!-- 
+  ===================================================================================
+  Botones estandart
+  ===================================================================================
+  -->
   <div class="flex items-end gap-2">
     <button class="tool-bar-button " (click)="refresh()" [disabled]="waitingForRows">
       <lucide-icon name="refresh-ccw" />
@@ -58,24 +42,22 @@ Configuración de columnas visibles
     Botones dinámicos
     ===================================================================================
     -->
-    @for (btn of buttons; track btn.key) {
-      @if (showAsButton(btn)) {
-        <button
-          class="tool-bar-button "
-          [disabled]="!isButtonEnabled(btn)"
-          (click)="btn.onClick?.()"
-          [attr.title]="resolveText(btn.label)"
-        >
-          @if (btn.icon) {
-            <lucide-icon [name]="btn.icon" />
-            <span class="hidden">
-              {{ resolveText(btn.label) }}
-            </span>
-          } @else {
-            {{ resolveText(btn.label) }}
-          }
-        </button>
-      }
+    @for (btn of actionButtons(); track btn.key) {
+      <button
+        class="tool-bar-button "
+        [disabled]="!isButtonEnabled(btn)"
+        (click)="handleOnButtonClick(btn)"
+        [attr.title]="i18n.resolve(btn.label)"
+      >
+        @if (btn.icon) {
+          <lucide-icon [name]="btn.icon" />
+          <span class="hidden">
+            {{ i18n.resolve(btn.label) }}
+          </span>
+        } @else {
+          {{ i18n.resolve(btn.label) }}
+        }
+      </button>
     }
   </div>
   <!-- 
@@ -87,7 +69,7 @@ Configuración de columnas visibles
     <button class="tool-bar-button " (click)="firstPage()" [disabled]="currentPage() === 1">
       <lucide-icon name="chevrons-left" />
     </button>
-    <button class="tool-bar-button " (click)="prevPage()" [disabled]="currentPage() === 1">
+    <button class="tool-bar-button" (click)="prevPage()" [disabled]="currentPage() === 1">
       <lucide-icon name="chevron-left" />
     </button>
     <input
@@ -98,17 +80,27 @@ Configuración de columnas visibles
       [min]="1"
       [max]="totalPages()"
     />
-    <button class="tool-bar-button " (click)="nextPage()" [disabled]="currentPage() === totalPages()">
+    <button class="tool-bar-button" (click)="nextPage()" [disabled]="currentPage() === totalPages()">
       <lucide-icon name="chevron-right" />
     </button>
-    <button class="tool-bar-button " (click)="lastPage()" [disabled]="currentPage() === totalPages()">
+    <button class="tool-bar-button" (click)="lastPage()" [disabled]="currentPage() === totalPages()">
       <lucide-icon name="chevrons-right" />
     </button>
     <!-- 
-    ===================================================================================
+    ===============================================
     Menú contextual
-    ===================================================================================
+    ===============================================
     -->
+    <app-table-menu 
+      [pageSize]="pageSize()"
+      [selectedRows]="selected()"
+      [rowsCount]="data().length"
+      [columns]="columns"
+      [visibleColumnIds]="visibleColumnIds()"
+      [menuItems]="buttons"
+      (toggleColumn)="handleToggleColumn($event)"
+      (actionTriggered)="onAction($event)"
+    />
 
   </div>
 </div>
@@ -158,7 +150,7 @@ TABLE
                 col.sorter ? 'flex items-center mr-2 gap-1.5' : '',
               ]"
               >
-              <div class="flex-1 text-left">{{ resolveText(col.title) }}</div>
+              <div class="flex-1 text-left">{{ i18n.resolve(col.title) }}</div>
               @if (sortedColumn() === col.key) {
                 @if(sortDirection() === 'desc'){
                   <lucide-icon class="size-4" name="chevron-up" />                
@@ -171,7 +163,11 @@ TABLE
                 <div class="size-4"></div>  
               }
               @if (pageRows().length > 0 && col.hideSeachButton !== true) {
-                 <lucide-icon class="size-4" name="menu" />
+                <app-table-column-filter
+                  [columnLabel]="i18n.resolve(col.title)"
+                  [values]="getUniqueValues(col)"
+                  [hideValues]="col.hideValueSelection || false"
+                />
               }
             </div>
           </th>

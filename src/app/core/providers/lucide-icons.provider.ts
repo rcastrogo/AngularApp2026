@@ -32,10 +32,17 @@ import {
   ChevronsRight,
   Globe,
   Menu,
+  Check,
+  ListCheck,
+  ListFilter,
+  Repeat,
+  SquareX,
 } from 'lucide-angular';
+
 
 const icons = {
   Menu,
+  Check,
   Home,
   Info,
   Mail,
@@ -64,6 +71,10 @@ const icons = {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  ListCheck,
+  ListFilter,
+  Repeat,
+  SquareX
 };
 
 export const lucideIconsProvider = importProvidersFrom(

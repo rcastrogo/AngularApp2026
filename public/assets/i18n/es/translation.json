@@ -10,7 +10,16 @@
         "no-rows": "{{entity}}. No hay registros.",
         "rows": "{{entity}}. {{count}} elemento/s",
         "selected": "({{count}} selecionado/s)",
-        "page": "Página {{page}}/{{total}}"
+        "page": "Página {{page}}/{{total}}",
+        "menu": { 
+            "select-count": "{{count}} selecionado/s",
+            "select-all": "Seleccionar todo",
+            "select-clear": "Limpiar selección",
+            "select-invert": "Invertir selección",
+            "select-set": "Solo seleccionados",
+            "columns": "Columnas",
+            "rows-per-page": "Registros por página"
+        }
     },
     "general": {
         "action": {
