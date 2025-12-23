@@ -20,14 +20,14 @@ export class TableColumnFilterMenuComponent {
   columnLabel = input.required<string>();
   values = input.required<string[]>();
   hideValues = input<boolean>(false);
-  selected: string[] = [];
   // ==============================================================
   // Outputs
   // ==============================================================
-  toggleValue = output<{ value: string; term: string }>();
+  changeFilter = output<{ text: string , values: string[] }>();
   // ==============================================================
   // Estado local
   // ==============================================================
+  selected = signal<string[]>([]);
   text = signal('');
   inputRef = viewChild<ElementRef<HTMLInputElement>>('inputRef');
   // ==============================================================
@@ -41,50 +41,48 @@ export class TableColumnFilterMenuComponent {
   private debounceSubject = new Subject<string>();
 
   constructor() {
-
     this.debounceSubject.pipe(debounceTime(300)).subscribe((val) => {
-      this.toggleValue.emit({ value: '', term: val });
+      this.changeFilter.emit({ text: val, values: this.selected() });
     });
   }
 
-  // Computed: Reemplaza useMemo
-  filteredValues = computed(() => {
-    return this.values();
-    // const normalizedText = this.text().trim().toLowerCase();
-    // const currentSelected = this.selected().map(s => s.toLowerCase());
+  hasActiveFilters = computed(() => this.text().length > 0 || this.selected().length > 0);
+  orderedValues = computed(() => {
+    return this.values().sort((a, b) => {
+      const aSel = this.selected().includes(a);
+      const bSel = this.selected().includes(b);
+      if (aSel && !bSel) return -1;
+      if (!aSel && bSel) return 1;
+      return a.localeCompare(b);
+    });
+  })
 
-    // const list = this.values().filter((value) => {
-    //   const v = value.toLowerCase();
-    //   return v.includes(normalizedText) || currentSelected.includes(v);
-    // });
-
-    // return list.sort((a, b) => {
-    //   const aSel = currentSelected.includes(a.toLowerCase());
-    //   const bSel = currentSelected.includes(b.toLowerCase());
-    //   return aSel === bSel ? 0 : aSel ? -1 : 1;
-    // });
-  });
-
-  hasActiveFilters = computed(() => this.text().length > 0 || this.selected.length > 0);
-
-  // Métodos
   handleInputChange(newVal: string) {
     this.text.set(newVal);
     this.debounceSubject.next(newVal);
   }
 
   handleCheckboxChange(value: string) {
-    this.toggleValue.emit({ value, term: this.text() });
+    this.selected.update(current => {
+      if (current.includes(value)) {
+        return current.filter(v => v !== value);
+      } else {
+        return [...current, value];
+      }
+    });
+    this.changeFilter.emit({ text: this.text(), values: this.selected()});
   }
 
   clearFilters() {
     this.text.set('');
-    this.toggleValue.emit({ value: '~~~~', term: '' });
+    this.selected.set([]);
+    this.changeFilter.emit({ text: this.text(), values: []});
   }
 
   onMenuOpened() {
     setTimeout(() => this.inputRef()?.nativeElement.focus(), 0);
   }
+
   closeMenu(){
     console.log('close');
   }

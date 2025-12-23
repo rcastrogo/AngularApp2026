@@ -4,9 +4,8 @@
     [cdkMenuTriggerFor]="menu" 
     (cdkMenuOpened)="onMenuOpened()" 
     (click)="$event.stopPropagation()"
-    class="relative flex h-8 w-8 items-center justify-center rounded-none transition-colors">
+    class="relative flex h-8 w-7 items-center justify-center rounded-none transition-colors">
     <lucide-angular [img]="MenuIcon" class="size-4"></lucide-angular>
-
     @if (hasActiveFilters()) {
       <span class="absolute left-5 top-1 block h-2 w-2 rounded-sm bg-yellow-400"></span>
     }
@@ -30,7 +29,10 @@
       <div class="w-full">
         <label class="">
           <span class="mb-2 inline-block text-sm">Buscar</span>
-          <input #inputRef cdkMenuItem type="text" [ngModel]="text()" (ngModelChange)="handleInputChange($event)"
+          <input #inputRef 
+            cdkMenuItem type="text"
+            [ngModel]="text()" 
+            (ngModelChange)="handleInputChange($event)"
             class="w-full rounded border border-slate-200 p-1 text-sm outline-none" />
         </label>  
       </div>
@@ -39,12 +41,12 @@
         <div class="flex w-full items-center text-sm mb-1">
           <span class="flex-1">Valores</span>
           @if (selected.length > 0) {
-            <span class="text-xs text-slate-400">{{ selected.length }}/{{ values()!.length }}</span>
+            <span class="text-xs text-slate-400">{{ selected().length }}/{{ values()!.length }}</span>
           }
         </div>
 
         <div class="h-44 flex-col overflow-y-auto rounded border border-gray-300 dark:border-gray-600 p-1">
-          @for (value of filteredValues(); track value) {
+          @for (value of orderedValues(); track value) {
             @if (value && value !== 'null') {
               <button 
                 type="button" 
@@ -53,11 +55,10 @@
                 class=" w-full text-left
                   group flex px-2 py-2 gap-2 items-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors 
                   disabled:opacity-50 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent">
-                  @if (selected.includes(value.toLowerCase())) {
+                  @if (selected().includes(value)) {
                     <lucide-angular [img]="CheckIcon" class="size-4"></lucide-angular>
                   } @else {
-                    <lucide-angular [img]="CheckIcon" class="size-4"></lucide-angular>
-                    <!-- <div class="size-4"></div> -->
+                    <div class="size-4"></div>
                   }
                   <span class="flex-1">
                     {{ value }}

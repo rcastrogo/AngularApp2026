@@ -189,16 +189,17 @@ export class TableComponent<T extends Identifiable> implements OnInit {
   // Ordenación de columnas
   // =============================================================================
   readonly sortedRows = computed(() => {
+    const data = this.filteredRows()
     const colKey = this.sortedColumn();
     const dir = this.sortDirection();
 
     if (!colKey || !dir) {
-      return this.data();
+      return data;
     }
 
     const column = this.columns.find(c => c.key === colKey);
     if (!column || !column.sorter) {
-      return this.data();
+      return data;
     }
 
     let sorterFn: (a: T, b: T) => number;
@@ -227,7 +228,7 @@ export class TableComponent<T extends Identifiable> implements OnInit {
       };
     }
 
-    return [...this.data()].sort((a, b) =>
+    return [...data].sort((a, b) =>
       dir === 'asc'
         ? sorterFn(a, b)
         : sorterFn(b, a)
@@ -382,5 +383,62 @@ export class TableComponent<T extends Identifiable> implements OnInit {
     return getUniqueValues(this.data() as [], column.key).sort(accentNumericComparer);
   }
 
+  // Guardamos los filtros activos por cada columna
+  activeFilters = signal<Record<string, { text: string, values: string[] }>>({});
+
+  handleActiveFilters(event: { text: string, values: string[] }, column: string) {
+    this.activeFilters.update(filters => ({
+      ...filters,
+      [column]: event
+    }));
+    this.currentPage.set(1);
+  }
+
+  // filteredData = computed(() => {
+  //   let result = [...this.data()];
+  //   const filters = this.activeFilters();
+  //   Object.keys(filters).forEach(col => {
+  //     const { text, values } = filters[col];
+
+  //     if (text) {
+  //       result = result.filter(c => {
+  //         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //         const target = (c as any)[col];
+  //         return String(target).toLowerCase().includes(text.toLowerCase())          
+  //       });
+  //     }
+
+  //     if (values.length > 0) { 
+  //       result = result.filter(c => {
+  //         // eslint-disable-next-line @typescript-eslint/no-explicit-any          
+  //         const target = (c as any)[col];
+  //         return values.includes(String(target))
+  //       });
+  //     }
+  //   });
+  //   return result;
+  // });
+
+  readonly filteredRows = computed(() => {
+    const rawData = this.data();
+    const filters = this.activeFilters();
+
+    if (Object.keys(filters).length === 0) return rawData;
+
+    return rawData.filter(item => {
+      return Object.keys(filters).every(col => {
+        const { text, values } = filters[col];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const val = String(this.resolveCellValue({ key: col } as any, item));     
+        // Si hay texto, debe incluirlo
+        const matchesText = !text || val.toLowerCase().includes(text.toLowerCase());
+        // Si hay valores seleccionados, debe estar entre ellos
+        const matchesValues = values.length === 0 ||  values.includes(val);
+        return matchesText && matchesValues;
+      });
+    });
+
+  });
+  
 }
 

@@ -162,11 +162,12 @@ TABLE
               } @else if(col.sorter) {
                 <div class="size-4"></div>  
               }
-              @if (pageRows().length > 0 && col.hideSeachButton !== true) {
+              @if (data().length > 0 && col.hideSeachButton !== true) {
                 <app-table-column-filter
                   [columnLabel]="i18n.resolve(col.title)"
                   [values]="getUniqueValues(col)"
                   [hideValues]="col.hideValueSelection || false"
+                  (changeFilter)="handleActiveFilters($event, col.key)"
                 />
               }
             </div>
