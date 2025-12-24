@@ -1,6 +1,7 @@
+import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { CdkMenuModule } from '@angular/cdk/menu';
 import { CommonModule } from '@angular/common';
-import { Component, computed, ElementRef, input, output, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, input, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { LucideAngularModule, Menu, Trash, X, Check } from 'lucide-angular';
@@ -10,7 +11,7 @@ import { debounceTime } from 'rxjs/operators';
 @Component({
   selector: 'app-table-column-filter',
   standalone: true,
-  imports: [CommonModule, FormsModule, CdkMenuModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, CdkMenuModule, LucideAngularModule, CdkTrapFocus, ],
   templateUrl: './app-table-column-filter.component.html',
 })
 export class TableColumnFilterMenuComponent {
@@ -20,6 +21,7 @@ export class TableColumnFilterMenuComponent {
   columnLabel = input.required<string>();
   values = input.required<string[]>();
   hideValues = input<boolean>(false);
+  resetToken = input<number>(0);
   // ==============================================================
   // Outputs
   // ==============================================================
@@ -41,6 +43,10 @@ export class TableColumnFilterMenuComponent {
   private debounceSubject = new Subject<string>();
 
   constructor() {
+    effect(() => {
+      this.resetToken();
+      this.clearFilters();
+    });
     this.debounceSubject.pipe(debounceTime(300)).subscribe((val) => {
       this.changeFilter.emit({ text: val, values: this.selected() });
     });
@@ -76,7 +82,7 @@ export class TableColumnFilterMenuComponent {
   clearFilters() {
     this.text.set('');
     this.selected.set([]);
-    this.changeFilter.emit({ text: this.text(), values: []});
+    this.changeFilter.emit({ text: '', values: []});
   }
 
   onMenuOpened() {

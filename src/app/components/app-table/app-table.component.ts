@@ -108,13 +108,17 @@ export class TableComponent<T extends Identifiable> implements OnInit {
   @Input() columns: Column<T>[] = [];
   @Input() buttons: ActionButton[] = [];
   @Input() set dataSource(value: T[]) {
-    this.data.set(value ?? []);
+    const safeValue = value ?? [];
+    this.dataOriginal.set(safeValue);
+    this.data.set(safeValue);
     this.selected.set(new Set());
     this.currentPage.set(1);
   }
   // =============================================================================
   // Signals
   // =============================================================================
+  readonly resetFilterToken = signal(0);
+  readonly dataOriginal = signal<T[]>([]);
   readonly data = signal<T[]>([]);
   readonly selected = signal<Set<string | number>>(new Set());
   readonly currentPage = signal(1);
@@ -297,11 +301,24 @@ export class TableComponent<T extends Identifiable> implements OnInit {
   }
 
   handleInvertSelection() {
-    console.log('handleInvertSelection');
+    const allIds = new Set(this.sortedRows().map(r => r.id));
+    const current = this.selected();
+
+    const inverted = new Set<string | number>();
+    for (const id of allIds) 
+      if (!current.has(id)) inverted.add(id);
+
+    this.selected.set(inverted);
   }
 
   handleShowOnlySelected() {
-    console.log('handleShowOnlySelected');
+    const selectedIds = this.selected();
+    if (selectedIds.size === 0) return;
+    const filtered = this.dataOriginal().filter(row =>
+      selectedIds.has(row.id)
+    );
+    this.data.set(filtered);
+    this.currentPage.set(1);
   }
 
   // =============================================================================
@@ -311,6 +328,7 @@ export class TableComponent<T extends Identifiable> implements OnInit {
     this.selected.set(new Set());
     this.actionHandlers?.onCustomAction?.('reload');
     this.firstPage();
+    this.resetActiveFilters();
   }
 
   insert() {
@@ -354,9 +372,12 @@ export class TableComponent<T extends Identifiable> implements OnInit {
     else if (action.startsWith(ACTIONS.PAGE_SIZE_PREFIX)) this.handlePageSizeCange(action.split('-')[2]);
     else if (action.startsWith(ACTIONS.TOGGLE_COLUMN_PREFIX)) this.handleToggleColumn(action.split('-')[2]);
     else this.actionHandlers?.onCustomAction?.(action, this.selected());
-    // console.log('Action triggered:', action);
+    console.log('Action triggered:', action);
   }
 
+  // ========================================================================================
+  // Recuperación de valores de las celdas y columnas 
+  // ========================================================================================
   resolveCellValue(column: Column<T>, item: T): string | number | boolean | null {
     if (column.accessor) {
       if (typeof column.accessor === "function") {
@@ -375,6 +396,7 @@ export class TableComponent<T extends Identifiable> implements OnInit {
     // ===============================================================================
     // Recuperar descripciones de los códigos
     // ===============================================================================
+    // const val = String(this.resolveCellValue({ key: col } as any, item));  
     // if (column.map) {
     //   const ids = getUniqueValues(datos as [], column.key);
     //   acc[column.key] = ids.map((id) => column.map!(~~id)).sort(accentNumericComparer);
@@ -383,9 +405,11 @@ export class TableComponent<T extends Identifiable> implements OnInit {
     return getUniqueValues(this.data() as [], column.key).sort(accentNumericComparer);
   }
 
-  // Guardamos los filtros activos por cada columna
+  // ========================================================================================
+  // Filtrado de filas 
+  // ========================================================================================
   activeFilters = signal<Record<string, { text: string, values: string[] }>>({});
-
+  resetActiveFilters = () => this.resetFilterToken.update(v => v + 1);
   handleActiveFilters(event: { text: string, values: string[] }, column: string) {
     this.activeFilters.update(filters => ({
       ...filters,
@@ -393,31 +417,6 @@ export class TableComponent<T extends Identifiable> implements OnInit {
     }));
     this.currentPage.set(1);
   }
-
-  // filteredData = computed(() => {
-  //   let result = [...this.data()];
-  //   const filters = this.activeFilters();
-  //   Object.keys(filters).forEach(col => {
-  //     const { text, values } = filters[col];
-
-  //     if (text) {
-  //       result = result.filter(c => {
-  //         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //         const target = (c as any)[col];
-  //         return String(target).toLowerCase().includes(text.toLowerCase())          
-  //       });
-  //     }
-
-  //     if (values.length > 0) { 
-  //       result = result.filter(c => {
-  //         // eslint-disable-next-line @typescript-eslint/no-explicit-any          
-  //         const target = (c as any)[col];
-  //         return values.includes(String(target))
-  //       });
-  //     }
-  //   });
-  //   return result;
-  // });
 
   readonly filteredRows = computed(() => {
     const rawData = this.data();

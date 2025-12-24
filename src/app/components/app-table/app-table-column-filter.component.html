@@ -12,7 +12,12 @@
   </button>
 
   <ng-template #menu>
-    <div cdkMenu class="bg-white dark:bg-gray-800 border rounded shadow-lg w-56 p-2 flex flex-col gap-1 text-sm">
+    <div
+      cdkMenu
+        cdkTrapFocus 
+        [cdkTrapFocusAutoCapture]="true"
+        class="bg-white dark:bg-gray-800 border rounded shadow-lg w-56 p-2 flex flex-col gap-1 text-sm"
+        >
       <div class="flex w-full items-center gap-2 border-b py-1 text-sm">
         <span class="flex-1 font-medium">{{ columnLabel() }}</span>
 
@@ -26,13 +31,15 @@
 
       </div>
 
-      <div class="w-full">
+      <div cdkMenuItem class="w-full">
         <label class="">
           <span class="mb-2 inline-block text-sm">Buscar</span>
           <input #inputRef 
-            cdkMenuItem type="text"
+            type="text"
             [ngModel]="text()" 
             (ngModelChange)="handleInputChange($event)"
+            (keydown)="$event.stopPropagation()" 
+            (click)="$event.stopPropagation()"
             class="w-full rounded border border-slate-200 p-1 text-sm outline-none" />
         </label>  
       </div>

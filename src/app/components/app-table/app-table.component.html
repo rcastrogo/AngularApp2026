@@ -8,10 +8,10 @@
   ===================================================================================
   -->
   <div class="text-sm">
-    @if (data().length === 0) {
+    @if (sortedRows().length === 0) {
       {{ i18n.t('app-table.no-rows', { entity: entity }) }}
     } @else {
-      {{ i18n.t('app-table.rows', { entity: entity, count: data().length }) }}
+      {{ i18n.t('app-table.rows', { entity: entity, count: sortedRows().length }) }}
       @if (selected().size > 0) {
          {{ i18n.t('app-table.selected', { count: selected().size }) }}
       }
@@ -94,7 +94,7 @@
     <app-table-menu 
       [pageSize]="pageSize()"
       [selectedRows]="selected()"
-      [rowsCount]="data().length"
+      [rowsCount]="sortedRows().length"
       [columns]="columns"
       [visibleColumnIds]="visibleColumnIds()"
       [menuItems]="buttons"
@@ -168,6 +168,7 @@ TABLE
                   [values]="getUniqueValues(col)"
                   [hideValues]="col.hideValueSelection || false"
                   (changeFilter)="handleActiveFilters($event, col.key)"
+                  [resetToken]="resetFilterToken()"
                 />
               }
             </div>
