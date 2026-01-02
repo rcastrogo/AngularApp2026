@@ -17,7 +17,6 @@ import { Footer } from '~/components/footer/footer.component';
 import { MSG_LANGUAGE_CHANGE, MSG_LOADING_BEGINS, MSG_LOADING_END } from '~/core/messages';
 import { pubSub } from '~/core/pubsub';
 
-
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, AppNavbar, Footer, LucideAngularModule, AppLoaderComponent],

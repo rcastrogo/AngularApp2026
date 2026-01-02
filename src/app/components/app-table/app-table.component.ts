@@ -130,7 +130,6 @@ export class TableComponent<T extends Identifiable> implements OnInit {
   // Inicialización
   // =================================================================================
   ngOnInit(): void {
-    console.log(this.key);
     const visibleColumnsKey = buildStorageKey(this.key, VISIBLE_COLUMNS);
     const savedColumns = storage.readValue<string[]>(visibleColumnsKey);
     this.visibleColumnIds.set(

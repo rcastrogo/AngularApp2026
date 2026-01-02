@@ -23,6 +23,8 @@
     },
     "general": {
         "action": {
+            "yes"   : "Sí",
+            "no"    : "No",
             "accept": "Aceptar",
             "close": "Cerrar",
             "cancel": "Cancelar",
