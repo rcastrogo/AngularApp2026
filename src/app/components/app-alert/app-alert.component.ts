@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { A11yModule } from '@angular/cdk/a11y';
 import { CommonModule } from '@angular/common';
 import { 
@@ -20,6 +20,10 @@ import {
 
 import { TranslationService } from '~/services/translation.service';
 
+export const literals = {
+  noYes : ['general.action.no', 'general.action.yes' ]
+}
+
 type AlertMode = 'text' | 'html' | 'template';
 export interface AlertOptions {
   title?: string;
@@ -27,6 +31,7 @@ export interface AlertOptions {
   asHtml?: boolean;
   asTemplate?: boolean;
   template?: TemplateRef<unknown>;
+  context?: unknown; 
   icon?: LucideIconData;
   showFooter?: boolean;
   showConfirmButton?:boolean;
@@ -35,6 +40,7 @@ export interface AlertOptions {
   onCancel?: () => void;
   onClose?: () => void;
   literals?: string[];
+  disableClose?: boolean;
 }
 
 @Component({
@@ -53,10 +59,12 @@ export class AlertComponent {
   #title = signal('');
   #message = signal('');
   #template = signal<TemplateRef<unknown> | null>(null);
+  #context = signal<unknown>(null);
   #hasFooter = signal(true);
   #icon = signal<LucideIconData | undefined >(undefined);
   #confirm = signal(false);
   #literals = signal<string[]>([]);
+  #disableClose = signal(false);
   
   isOpen = signal(false);
   isHtml = computed(() => this.#mode() === 'html');
@@ -67,6 +75,7 @@ export class AlertComponent {
   showConfirmBtn = computed(() => ( this.#confirm()))
   title = computed(() => this.#title());
   icon = computed(() => this.#icon());
+  context = computed(() => this.#context());
   literals = computed(() => {
     return [
       this.i18n.resolve(this.#literals()[0] || 'general.action.close'),
@@ -86,7 +95,11 @@ export class AlertComponent {
   constructor() {
     afterNextRender(() => {
       document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && this.isOpen()) {
+        if (
+          event.key === 'Escape' && 
+          this.isOpen() && 
+          !this.#disableClose()
+        ) {
           this.close();
         }
       });
@@ -103,10 +116,12 @@ export class AlertComponent {
     this.#icon.set(options.icon);
     this.#hasFooter.set(options.showFooter ?? false);
     this.#confirm.set(options.showConfirmButton ?? false)
+    this.#disableClose.set(!!options.disableClose);
 
     if (options.asTemplate && options.template) {
       this.#mode.set('template');
       this.#template.set(options.template);
+      this.#context.set(options.context ?? null);
     } 
     else if (options.asHtml) {
       this.#message.set(options.message);
@@ -142,13 +157,14 @@ export class AlertComponent {
   }
 
   onBackdropClick(event: MouseEvent): void {
+    if (this.#disableClose()) return;
     if ((event.target as HTMLElement).classList.contains('js-back-drop')) {
       this.onCancel();
     }
   }
 
   onCancel(): void {
-    console.log('this.onCancel()');
+    if (this.#disableClose()) return;
     this.cancelled.emit();
     this.close();
   }

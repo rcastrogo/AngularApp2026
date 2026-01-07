@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { TranslationService } from '~/services/translation.service';
+
 /**
  * Returns a sanitized object from a FormData instance, trimming whitespace
  * from string values and preserving file entries as-is.
@@ -62,12 +64,20 @@ function createMap(array: any[], idKey = 'id', nameKey = 'name'): { [k: string]:
  * getValueByPath(obj, 'user.email'); // undefined
  */
 function getValueByPath (item: any, path: string): any {
-  if (!path) return item.toString();
-  const parts = path.split('.');
-  let current: any = item;
+  // if (!path) return item.toString();
+  // const parts = path.split('.');
+  // let current: any = item;
 
-  for (const part of parts) {
-    if (current === null || typeof current !== 'object') return undefined;
+  // for (const part of parts) {
+  //   if (current === null || typeof current !== 'object') return undefined;
+  //   current = current[part];
+  // }
+  // return current;
+  if (!path) return item;
+  if (!path.includes('.')) return item?.[path];
+  let current = item;
+  for (const part of path.split('.')) {
+    if (current == null) return undefined;
     current = current[part];
   }
   return current;
@@ -126,6 +136,39 @@ function getUniqueValues(data:[], key: string) {
   return [...new Set(data.map((row) => String((row as any)[key])))];
 }
 
+function getUniqueValuesSorted<T>(
+  values: T[],
+  comparer?: (a: T, b: T) => number
+): T[] {
+  const set = new Set<T>();
+  for (const v of values) {
+    if (v !== null && v !== undefined) {
+      set.add(v);
+    }
+  }
+  return Array.from(set).sort(comparer);
+}
+
+const EMPTY = '__EMPTY__';
+const NULL = '__NULL__';
+const UNDEFINED = '__UNDEFINED__';
+
+function normalizeValue(raw: unknown): string {
+  if (raw === undefined) return UNDEFINED;
+  if (raw === null) return NULL;
+  if (raw === '') return EMPTY;
+  return String(raw);
+}
+
+function displayValue(val: string, i18n?: TranslationService): string {
+  switch (val) {
+    case EMPTY: return i18n ? i18n.t('general.empty') : '(Vacío)';
+    case NULL: return i18n ? i18n.t('general.null') : '(Nulo)';
+    case UNDEFINED: return i18n ? i18n.t('general.undefined') : '(Indefinido)';
+    default: return val;
+  }
+}
+
 export {
   getSafeFormData,
   createMap,
@@ -134,4 +177,10 @@ export {
   getValueByPath,
   formatNumber,
   getUniqueValues,
+  getUniqueValuesSorted,
+  EMPTY,
+  NULL,
+  UNDEFINED,
+  normalizeValue,
+  displayValue,
 };

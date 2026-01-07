@@ -1,5 +1,5 @@
 
-import { Component, inject } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 
 import { LucideAngularModule } from 'lucide-angular'; 
 
@@ -21,7 +21,7 @@ import { TranslationService } from '~/services/translation.service';
 export class AppLoaderComponent {
   i18n = inject(TranslationService);
 
-  public text = 'Inicializando';
+   @Input() text = 'Inicializando';
 
   constructor() {
     const saved = this.i18n.getLang();

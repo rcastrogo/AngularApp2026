@@ -31,6 +31,18 @@ export class AlertService {
   // API pública
   // =====================================================
 
+  showLoading(message: string){
+    const html = `
+      <div class="flex flex-col items-center gap-3 justify-center m-1">
+        ${message}  
+        <div class="h-1 w-full overflow-hidden rounded-full bg-red-700 mb-1">
+          <div class="h-full w-full origin-left animate-[progress_2.5s_infinite_linear] bg-gray-400"></div>        
+        </div>
+      </div>
+    `;
+    this.showInfo(html, { asHtml: true, icon: undefined, disableClose: true, });
+  }
+
   showInfo(message: string, options?: Partial<AlertOptions>) {
     this.show({
       icon: Info,
@@ -116,21 +128,19 @@ export class AlertService {
     this.alertRef = this.componentRef.instance;
 
     this.alertRef.setOptions(options);
-    this.alertRef.open();
-    this.alertRef.confirmed.subscribe(() => {
-      options.onConfirm?.();
-    });
-    this.alertRef.cancelled.subscribe(() => {
-      options.onCancel?.();
-    });
+
+    this.appRef.attachView(this.componentRef.hostView);
+    document.body.appendChild(this.componentRef.location.nativeElement);
+
+    this.alertRef.confirmed.subscribe(() => options.onConfirm?.());
+    this.alertRef.cancelled.subscribe(() => options.onCancel?.());
+
     this.alertRef.closed.subscribe(() => {
       options.onClose?.();
       this.destroy();
     });
-    this.alertRef.closed.subscribe(() => this.destroy());
 
-    this.appRef.attachView(this.componentRef.hostView);
-    document.body.appendChild(this.componentRef.location.nativeElement);
+    this.alertRef.open();
   }
 
   private destroy() {

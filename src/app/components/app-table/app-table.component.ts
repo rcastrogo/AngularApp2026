@@ -16,7 +16,7 @@ import {
 import { LucideAngularModule } from 'lucide-angular';
 
 import { storage } from '~/core/storageUtil';
-import { accentNumericComparer, getUniqueValues, getValueByPath } from '~/core/utils';
+import { accentNumericComparer, EMPTY, getUniqueValuesSorted, getValueByPath, normalizeValue, NULL, UNDEFINED } from '~/core/utils';
 import { Localizable, TranslationService } from '~/services/translation.service';
 
 import { TableColumnFilterMenuComponent } from "./app-table-column-filter.component";
@@ -75,6 +75,7 @@ export interface ActionButton {
 
 const TABLE_STORAGE_KEY = 'app-table';
 const VISIBLE_COLUMNS = 'visibleColumns';
+const PAGE_SIZE = 'pageSize';
 const buildStorageKey = (base:string, name: string) => {
   return TABLE_STORAGE_KEY + '-' + base + '-' + name;
 }
@@ -93,7 +94,7 @@ const buildStorageKey = (base:string, name: string) => {
 })
 export class TableComponent<T extends Identifiable> implements OnInit {
   // =============================================================================
-  // injección de servicios
+  // Injección de servicios
   // =============================================================================
   i18n = inject(TranslationService);
   // =============================================================================
@@ -112,7 +113,6 @@ export class TableComponent<T extends Identifiable> implements OnInit {
     this.dataOriginal.set(safeValue);
     this.data.set(safeValue);
     this.selected.set(new Set());
-    this.currentPage.set(1);
   }
   // =============================================================================
   // Signals
@@ -126,12 +126,15 @@ export class TableComponent<T extends Identifiable> implements OnInit {
   readonly sortedColumn = signal<string | null>(null);
   readonly sortDirection = signal<'asc' | 'desc' | null>(null);
   readonly visibleColumnIds = signal<Set<string>>(new Set());
-  // =================================================================================
+  // =============================================================================
   // Inicialización
-  // =================================================================================
+  // =============================================================================
   ngOnInit(): void {
+    const pageSizeKey = buildStorageKey(this.key, PAGE_SIZE);
     const visibleColumnsKey = buildStorageKey(this.key, VISIBLE_COLUMNS);
     const savedColumns = storage.readValue<string[]>(visibleColumnsKey);
+    const savedPageSize = storage.readValue<number>(pageSizeKey, 5);
+    this.pageSize.set(savedPageSize);
     this.visibleColumnIds.set(
       new Set(
         savedColumns?.length
@@ -141,7 +144,7 @@ export class TableComponent<T extends Identifiable> implements OnInit {
             .filter(c => c.isVisible !== false)
             .map(c => c.key)
       )
-    );
+    );    
   }
   // =============================================================================
   // Persistencia
@@ -149,11 +152,13 @@ export class TableComponent<T extends Identifiable> implements OnInit {
   private readonly _persist = effect(() => {
     const visibleColumnsKey = buildStorageKey(this.key, VISIBLE_COLUMNS);
     storage.writeValue( visibleColumnsKey, Array.from(this.visibleColumnIds()) );
+    const pageSizeKey = buildStorageKey(this.key, PAGE_SIZE);
+    storage.writeValue( pageSizeKey, this.pageSize() );
   });
 
-  // =============================================================
+  // =============================================================================
   // Botones
-  // =============================================================
+  // =============================================================================
   readonly actionButtons = computed(() =>
     this.buttons.filter(
       btn => !btn.show || btn.show === 'button' || btn.show === 'both'
@@ -320,6 +325,16 @@ export class TableComponent<T extends Identifiable> implements OnInit {
     this.currentPage.set(1);
   }
 
+  private readonly _selected = effect(() => {
+    const visibleIds = new Set(this.filteredRows().map(row => row.id));
+    this.selected.update(current => {
+      const next = new Set(current);
+      for (const id of current) {
+        if (!visibleIds.has(id)) next.delete(id);
+      }
+      return next;
+    });
+  });
   // =============================================================================
   // Acciones
   // =============================================================================
@@ -333,7 +348,9 @@ export class TableComponent<T extends Identifiable> implements OnInit {
   insert() {
     this.actionHandlers?.onCreate?.(item => {
       this.data.update(d => [...d, item]);
-      this.lastPage();
+      queueMicrotask(() => {
+        this.lastPage();
+      });
     });
   }
 
@@ -377,42 +394,59 @@ export class TableComponent<T extends Identifiable> implements OnInit {
   // ========================================================================================
   // Recuperación de valores de las celdas y columnas 
   // ========================================================================================
-  resolveCellValue(column: Column<T>, item: T): string | number | boolean | null {
+  resolveCellValue(column: Column<T>, item: T): string | number | boolean | null {    
+    let value: string | number | boolean | null;
+
     if (column.accessor) {
-      if (typeof column.accessor === "function") {
-        return column.accessor(item);
-      }
-      return getValueByPath(item, column.accessor as string);
+      value = typeof column.accessor === 'function'
+        ? column.accessor(item)
+        : getValueByPath(item, column.accessor as string);
+    } 
+    else {
+      value = getValueByPath(item, column.key);
     }
-    if (column.map && typeof column.map === "function") {
-      const raw = getValueByPath(item, column.key);
-      return column.map(raw);
+    if (column.map && typeof column.map === 'function') {
+      value = column.map(value as number);
     }
-    return getValueByPath(item, column.key);
+    return value ?? null;
   };
 
-  getUniqueValues = (column: Column<T>) => {
-    // ===============================================================================
-    // Recuperar descripciones de los códigos
-    // ===============================================================================
-    // const val = String(this.resolveCellValue({ key: col } as any, item));  
-    // if (column.map) {
-    //   const ids = getUniqueValues(datos as [], column.key);
-    //   acc[column.key] = ids.map((id) => column.map!(~~id)).sort(accentNumericComparer);
-    //   return acc;
-    // }
-    return getUniqueValues(this.data() as [], column.key).sort(accentNumericComparer);
+  getUniqueValues(column: Column<T>) {
+    const values = this.data().map(item =>
+      normalizeValue(
+        this.resolveCellValue(column, item)
+      )
+    );
+    return getUniqueValuesSorted(values, accentNumericComparer);
   }
+
+  // getUniqueValues(column: Column<T>) {
+  //   const values = this.data()
+  //     .map(item => this.resolveCellValue(column, item))
+  //     .filter(
+  //       (v): v is string | number | boolean =>
+  //         v !== null && v !== undefined
+  //     )
+  //     .map(v => String(v));
+  //   return getUniqueValuesSorted(values, accentNumericComparer);
+  // }
 
   // ========================================================================================
   // Filtrado de filas 
   // ========================================================================================
-  activeFilters = signal<Record<string, { text: string, values: string[] }>>({});
+  activeFilters = signal<Record<string, { column: Column<T>; text: string; values: string[] }>>({});
   resetActiveFilters = () => this.resetFilterToken.update(v => v + 1);
-  handleActiveFilters(event: { text: string, values: string[] }, column: string) {
+
+  handleActiveFilters(
+    event: { text: string; values: string[] },
+    column: Column<T>
+  ) {
     this.activeFilters.update(filters => ({
       ...filters,
-      [column]: event
+      [column.key]: {
+        column,
+        ...event
+      }
     }));
     this.currentPage.set(1);
   }
@@ -423,20 +457,45 @@ export class TableComponent<T extends Identifiable> implements OnInit {
 
     if (Object.keys(filters).length === 0) return rawData;
 
-    return rawData.filter(item => {
-      return Object.keys(filters).every(col => {
-        const { text, values } = filters[col];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const val = String(this.resolveCellValue({ key: col } as any, item));     
-        // Si hay texto, debe incluirlo
-        const matchesText = !text || val.toLowerCase().includes(text.toLowerCase());
-        // Si hay valores seleccionados, debe estar entre ellos
-        const matchesValues = values.length === 0 ||  values.includes(val);
-        return matchesText && matchesValues;
-      });
-    });
+    return rawData.filter(item =>
+      Object.values(filters).every(({ column, text, values }) => {
+        const val = normalizeValue(
+          this.resolveCellValue(column, item)
+        );
 
+        const matchesText =
+          !text ||
+          (val !== EMPTY &&
+          val !== NULL &&
+          val !== UNDEFINED &&
+          val.toLowerCase().includes(text.toLowerCase()));
+
+        const matchesValues =
+          values.length === 0 || values.includes(val);
+
+        return matchesText && matchesValues;
+      })
+    );
   });
+
+  // readonly filteredRows = computed(() => {
+  //   const rawData = this.data();
+  //   const filters = this.activeFilters();
+
+  //   if (Object.keys(filters).length === 0) return rawData;
+
+  //   return rawData.filter(item =>
+  //     Object.values(filters).every(({ column, text, values }) => {
+  //       const raw = this.resolveCellValue(column, item);
+  //       const val = raw == null ? '' : String(raw);
+
+  //       const matchesText = !text || val.toLowerCase().includes(text.toLowerCase());
+  //       const matchesValues = values.length === 0 || values.includes(val);
+
+  //       return matchesText && matchesValues;
+  //     })
+  //   );
+  // });
   
 }
 

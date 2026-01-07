@@ -22,6 +22,9 @@
         }
     },
     "general": {
+        "empty" : "(Empty)",
+        "null" : "(Null)",
+        "undefined" : "(Undefined)",
         "action": {
             "yes"   : "Yes",
             "no"    : "No",
@@ -175,6 +178,7 @@
             "region": "Region",
             "population": "Population",
             "flag": "Flag"
-        }
+        },
+        "deleting" : "Deleting items"
     }
 }

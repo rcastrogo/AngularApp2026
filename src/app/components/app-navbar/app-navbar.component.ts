@@ -13,6 +13,9 @@ import { TranslationService } from '~/services/translation.service';
 
 @Component({
   selector: 'app-app-navbar',
+  host: {
+    class: 'sticky top-0 z-50'
+  },
   imports: [
     RouterLink,
     RouterLinkActive,

@@ -1,7 +1,7 @@
 
 <div 
   [attr.data-lng] = "i18n.langVersion()"
-  class="flex flex-wrap gap-2 mt-2 border-b pb-2 mb-2 items-center">
+  class="flex flex-wrap gap-2 mt-2 border-b border-t py-1 mb-2 items-center">
   <!-- 
   ===================================================================================
   Información de registros
@@ -24,17 +24,17 @@
   Botones estandart
   ===================================================================================
   -->
-  <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end">
-    <button class="tool-bar-button " (click)="refresh()" [disabled]="waitingForRows">
+  <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end md:justify-center">
+    <button class="tool-bar-button p-2!" (click)="refresh()" [disabled]="waitingForRows">
       <lucide-icon name="refresh-ccw" />
     </button>
-    <button class="tool-bar-button " (click)="insert()">
+    <button class="tool-bar-button p-2!" (click)="insert()">
       <lucide-icon name="plus" />
     </button>
-    <button class="tool-bar-button " (click)="deleteSelected()" [disabled]="selected().size === 0">
+    <button class="tool-bar-button p-2!" (click)="deleteSelected()" [disabled]="selected().size === 0">
       <lucide-icon name="trash-2" />
     </button>
-    <button class="tool-bar-button " (click)="editSelected()" [disabled]="selected().size !== 1">
+    <button class="tool-bar-button p-2!" (click)="editSelected()" [disabled]="selected().size !== 1">
       <lucide-icon name="edit" />
     </button>
     <!-- 
@@ -44,7 +44,7 @@
     -->
     @for (btn of actionButtons(); track btn.key) {
       <button
-        class="tool-bar-button "
+        class="tool-bar-button p-2!"
         [disabled]="!isButtonEnabled(btn)"
         (click)="handleOnButtonClick(btn)"
         [attr.title]="i18n.resolve(btn.label)"
@@ -59,31 +59,31 @@
         }
       </button>
     }
-  </div>
+  <!-- </div> -->
   <!-- 
   ===================================================================================
   Botones navegación
   ===================================================================================
   -->
-  <div class="flex items-center w-full md:w-auto justify-start md:justify-end">
-    <button class="tool-bar-button " (click)="firstPage()" [disabled]="currentPage() === 1">
+  <!-- <div class="flex items-center w-full md:w-auto justify-end md:justify-center"> -->
+    <button class="tool-bar-button p-2!" (click)="firstPage()" [disabled]="currentPage() === 1">
       <lucide-icon name="chevrons-left" />
     </button>
-    <button class="tool-bar-button" (click)="prevPage()" [disabled]="currentPage() === 1">
+    <button class="tool-bar-button p-2!" (click)="prevPage()" [disabled]="currentPage() === 1">
       <lucide-icon name="chevron-left" />
     </button>
     <input
       type="text"
-      class="w-14 h-9 text-center border-accent rounded"
+      class="w-8 sm:w-10 h-9 text-center border-accent rounded"
       [value]="currentPage()"
       (change)="goToPage($event)"
       [min]="1"
       [max]="totalPages()"
     />
-    <button class="tool-bar-button" (click)="nextPage()" [disabled]="currentPage() === totalPages()">
+    <button class="tool-bar-button p-2!" (click)="nextPage()" [disabled]="currentPage() === totalPages()">
       <lucide-icon name="chevron-right" />
     </button>
-    <button class="tool-bar-button" (click)="lastPage()" [disabled]="currentPage() === totalPages()">
+    <button class="tool-bar-button p-2!" (click)="lastPage()" [disabled]="currentPage() === totalPages()">
       <lucide-icon name="chevrons-right" />
     </button>
     <!-- 
@@ -167,7 +167,7 @@ TABLE
                   [columnLabel]="i18n.resolve(col.title)"
                   [values]="getUniqueValues(col)"
                   [hideValues]="col.hideValueSelection || false"
-                  (changeFilter)="handleActiveFilters($event, col.key)"
+                  (changeFilter)="handleActiveFilters($event, col)"
                   [resetToken]="resetFilterToken()"
                 />
               }

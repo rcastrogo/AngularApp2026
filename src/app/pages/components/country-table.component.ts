@@ -1,22 +1,55 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ViewChild, TemplateRef } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
+import { literals } from '~/components/app-alert/app-alert.component';
 import { TableComponent, Column, ActionHandlers, CellContext, ActionButton } from '~/components/app-table/app-table.component';
 import { MSG_LOADING_BEGINS, MSG_LOADING_END } from '~/core/messages';
 import { pubSub } from '~/core/pubsub';
 import { accentNumericComparer, formatNumber } from '~/core/utils';
+import { AlertService } from '~/services/alert.service';
 import { Country, CountriesService } from '~/services/api/countries.service';
 import { TranslationService } from '~/services/translation.service';
+
+interface ExportItem {
+  id: string | number;
+  name: string;
+  notes: string;
+}
 
 @Component({
   selector: 'app-country-table',
   standalone: true,
   imports: [
     CommonModule,
-    TableComponent
-  ],
+    FormsModule,
+    TableComponent,
+],
   template: `
+    <ng-template #flagCell let-row let-col="column">
+      <div class="flex items-center p-px border rounded-2xl m-2">
+        <img [src]="row.flag" class="w-full m-auto rounded-2xl min-h-14" alt="imagen de una bandera"/>
+      </div>
+    </ng-template>
+    <ng-template #export_template let-items="items">
+      <div class="space-y-3 w-full max-h-96 overflow-auto">
+        @for (item of items; track item.id) {
+          <div class="border rounded p-3 space-y-1">
+            <div class="font-medium">
+              {{ item.name }}
+            </div>
+            <textarea
+              [(ngModel)]="item.notes"
+              rows="2"
+              class="w-full border rounded p-2 text-sm"
+              placeholder="Observaciones…"
+            ></textarea>
+          </div>
+        }
+
+      </div>
+    </ng-template>
     <div class="p-4 space-y-4">
 
       <input
@@ -25,12 +58,6 @@ import { TranslationService } from '~/services/translation.service';
         placeholder="Escribe el nombre de un país..."
         class="border p-2 w-full rounded"
       />
-
-      <ng-template #flagCell let-row let-col="column">
-        <div class="flex items-center p-px border rounded-2xl m-2">
-          <img [src]="row.flag" class="w-full m-auto rounded-2xl min-h-14" alt="imagen de una bandera"/>
-        </div>
-      </ng-template>
 
       <app-table
         [key]="'countries'"
@@ -48,6 +75,7 @@ import { TranslationService } from '~/services/translation.service';
 export class CountryTableComponent implements OnInit {
 
   private i18n = inject(TranslationService);
+  alert = inject(AlertService);
   private countriesService = inject(CountriesService);
 
   countries = signal<Country[]>([]);
@@ -66,14 +94,14 @@ export class CountryTableComponent implements OnInit {
     icon: 'download',
     show: 'menu',
     enabledWhen: selected => selected.size > 0,
-    onClick: () => alert('onclick Export')
+    // onClick: () => this.alert.showInfo('onclick Export', { title: this.getEntityName() })
   };
 
   btnSearch: ActionButton = {
     key: 'search',
     label: { key: 'general.action.search' },
     icon: 'search',
-    onClick: () => alert('Buscar')
+    onClick: () => this.alert.showInfo('Buscar', { title: this.getEntityName() })
   };
 
   btnSettings: ActionButton = {
@@ -82,7 +110,7 @@ export class CountryTableComponent implements OnInit {
     icon: 'settings',
     show: 'menu',
     enabledWhen: selected => selected.size == 1,
-    onClick: () => alert('onclick Config')
+    onClick: () => this.alert.showInfo('onclick Config', { title: this.getEntityName() })
   };
 
   async ngOnInit() {
@@ -168,51 +196,110 @@ export class CountryTableComponent implements OnInit {
     ];
   }
 
-
+  private _id = 10000;
   private handleCreate: ActionHandlers<Country>['onCreate'] = (done) => {
-    alert('handleCreate');
-    const newCountry: Country = {
-      id: Date.now(),
-      name: 'Nuevo País',
-      capital: 'Capital X',
-      region: 'Región Y',
-      population: 0,
-      flag: '',
-      cca2: '',
-      data: {},
-    };
-    this.countries.update(list => [...list, newCountry]);
-    done(newCountry);
-  };
 
+    const __action = () => {
+      const newCountry: Country = {
+        id: this._id++,
+        name: 'Nuevo País',
+        capital: 'Capital X',
+        region: 'Región Y',
+        population: 0,
+        flag: '',
+        cca2: '',
+        data: {},
+      };
+      done(newCountry);
+    }
+
+    this.alert.showInfo(
+      'handleCreate', 
+      { 
+        title: this.getEntityName(),
+        autoCloseMs: 1500,
+        onClose: __action,
+      });
+  };
   private handleDelete: ActionHandlers<Country>['onDelete'] = (ids, done) => {
-    alert('handleDelete');
-    this.countries.update(list =>
-      list.filter(c => !ids.includes(c.id))
-    );
-    done();
+    const __action = () => {
+      pubSub.publish(MSG_LOADING_BEGINS);
+
+      this.alert.showLoading(this.i18n.t('country-table.deleting'));
+      setTimeout(() => {
+        pubSub.publish(MSG_LOADING_END);
+        this.alert.close();
+        done();    
+      }, 3000);
+    }
+    const message = '¿Está seguro de eliminar los elementos seleccionados?';
+    const options = {
+        title: this.getEntityName(),
+        showConfirmButton: true,
+        literals: literals.noYes,
+        onConfirm: __action
+    }
+    this.alert.showQuestion(message, options);
   };
 
   private handleEdit: ActionHandlers<Country>['onEdit'] = (country, done) => {
-    alert('handleEdit');
+    this.alert.showInfo('handleEdit', { title: this.getEntityName() });
     const updated: Country = {
       ...country,
       name: country.name + ' (editado)'
     };
 
-    this.countries.update(list =>
-      list.map(c => c.id === country.id ? updated : c)
-    );
-
     done(updated);
   };
 
-  private handleCustomAction: ActionHandlers<Country>['onCustomAction'] = (action) => {
+  private handleCustomAction: ActionHandlers<Country>['onCustomAction'] = (action, data) => {
     if (action === 'reload') {
       this.fetchCountries();
     }
-    alert('handleCustomAction: ' + action);
+    else if (action === 'export') {
+      this.handleExport(data);
+      return;
+    }
+    
+    this.alert.showInfo('handleCustomAction: ' + action, { title: this.getEntityName() });
   };
+
+  // =======================================================================================
+  // Ejemplo de implementación de dialogo modal
+  // =======================================================================================
+  exportItems = signal<ExportItem[]>([]);
+  @ViewChild('export_template') tpl!: TemplateRef<{
+    $implicit: ExportItem[];
+  }>;
+
+  private handleExport(ids: Set<string | number>) {
+
+    const targets: ExportItem[] =  this.countries()
+          .filter(c => ids.has(c.id))
+          .map(c => ({
+            id: c.id,
+            name: c.name,
+            notes: '',
+          }));
+    this.exportItems.set(targets);
+
+    console.log(targets);
+
+    this.alert.showTemplate(
+      this.tpl, 
+      {
+        message: '',
+        title: 'Export info',
+        showFooter: true,
+        showConfirmButton: true,
+        context: { items: this.exportItems() },
+        onConfirm: () => {
+          const result = this.exportItems();
+          console.log('EXPORT RESULT', result);
+        },
+      }
+    );
+  }
 
   getEntityName = () => this.i18n.t('country-table.entity-name');
 

@@ -1,12 +1,15 @@
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { CdkMenuModule } from '@angular/cdk/menu';
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, ElementRef, input, output, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { LucideAngularModule, Menu, Trash, X, Check } from 'lucide-angular';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+
+import { accentNumericComparer, displayValue } from '~/core/utils';
+import { TranslationService } from '~/services/translation.service';
 
 @Component({
   selector: 'app-table-column-filter',
@@ -15,6 +18,10 @@ import { debounceTime } from 'rxjs/operators';
   templateUrl: './app-table-column-filter.component.html',
 })
 export class TableColumnFilterMenuComponent {
+  // =============================================================================
+  // injección de servicios
+  // =============================================================================
+  i18n = inject(TranslationService);
   // ==============================================================
   // Inputs
   // ==============================================================
@@ -42,6 +49,8 @@ export class TableColumnFilterMenuComponent {
 
   private debounceSubject = new Subject<string>();
 
+  readonly displayValue = displayValue;
+
   constructor() {
     effect(() => {
       this.resetToken();
@@ -54,13 +63,14 @@ export class TableColumnFilterMenuComponent {
 
   hasActiveFilters = computed(() => this.text().length > 0 || this.selected().length > 0);
   orderedValues = computed(() => {
-    return this.values().sort((a, b) => {
-      const aSel = this.selected().includes(a);
-      const bSel = this.selected().includes(b);
-      if (aSel && !bSel) return -1;
-      if (!aSel && bSel) return 1;
-      return a.localeCompare(b);
-    });
+    return this.values().sort(accentNumericComparer);
+    // return this.values().sort((a, b) => {
+    //   const aSel = this.selected().includes(a);
+    //   const bSel = this.selected().includes(b);
+    //   if (aSel && !bSel) return -1;
+    //   if (!aSel && bSel) return 1;
+    //   return a.localeCompare(b);
+    // });
   })
 
   handleInputChange(newVal: string) {

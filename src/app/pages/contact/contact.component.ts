@@ -1,5 +1,6 @@
 import { Component, inject, TemplateRef, ViewChild } from '@angular/core';
 
+import { literals } from '~/components/app-alert/app-alert.component';
 import { AlertService } from '~/services/alert.service';
 import { TranslationService } from '~/services/translation.service';
 
@@ -72,7 +73,7 @@ export class ContactComponent {
     this.alert.showInfo(
       'This is an informational alert that closes automatically.',
       {
-        autoCloseMs: 20500,
+        autoCloseMs: 1500,
         onClose: () => console.log('Info closed'),
       }
     );
@@ -137,10 +138,7 @@ export class ContactComponent {
       'Do you really want to delete this item?',
       {
         title: 'Delete item',        
-        literals: [
-          'general.action.no', 
-          'general.action.yes'
-        ]
+        literals: literals.noYes
       }
     );
 

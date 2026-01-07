@@ -22,6 +22,9 @@
         }
     },
     "general": {
+        "empty" : "(Vacío)",
+        "null" : "(Nulo)",
+        "undefined" : "(Indefinido)",
         "action": {
             "yes"   : "Sí",
             "no"    : "No",
@@ -175,6 +178,7 @@
             "region": "Región",
             "population": "Población",
             "flag": "Bandera"
-        }
+        },
+        "deleting" : "Eliminando elementos"
     }
 }

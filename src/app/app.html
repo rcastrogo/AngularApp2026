@@ -1,5 +1,5 @@
 
-<div class="flex flex-col min-h-screen bg-background dark:bg-background overflow-hidden">
+<div class="flex flex-col min-h-screen bg-background dark:bg-background">
   @if (isReady()) {
     <app-app-navbar></app-app-navbar>
     @if (isLoading()) {
@@ -9,7 +9,7 @@
     } @else {
       <div class="h-px w-full"></div>
     }
-    <main class="flex-1 max-w-5xl mx-auto w-full p-4">
+    <main class="flex-1 max-w-5xl mx-auto w-full p-4 overflow-hidden">
       <router-outlet/>
     </main>
     <app-footer></app-footer>
