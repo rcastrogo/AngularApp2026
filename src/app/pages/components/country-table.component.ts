@@ -10,6 +10,7 @@ import { pubSub } from '~/core/pubsub';
 import { accentNumericComparer, formatNumber } from '~/core/utils';
 import { AlertService } from '~/services/alert.service';
 import { Country, CountriesService } from '~/services/api/countries.service';
+import { NotificationService } from '~/services/notification.service';
 import { TranslationService } from '~/services/translation.service';
 
 interface ExportItem {
@@ -76,6 +77,7 @@ export class CountryTableComponent implements OnInit {
 
   private i18n = inject(TranslationService);
   alert = inject(AlertService);
+  notifications = inject(NotificationService);
   private countriesService = inject(CountriesService);
 
   countries = signal<Country[]>([]);
@@ -101,7 +103,7 @@ export class CountryTableComponent implements OnInit {
     key: 'search',
     label: { key: 'general.action.search' },
     icon: 'search',
-    onClick: () => this.alert.showInfo('Buscar', { title: this.getEntityName() })
+    onClick: () => this.notifications.info('Buscar')
   };
 
   btnSettings: ActionButton = {
@@ -229,6 +231,7 @@ export class CountryTableComponent implements OnInit {
       setTimeout(() => {
         pubSub.publish(MSG_LOADING_END);
         this.alert.close();
+        this.notifications.success('País eliminado correctamente')
         done();    
       }, 3000);
     }
@@ -252,7 +255,7 @@ export class CountryTableComponent implements OnInit {
     done(updated);
   };
 
-  private handleCustomAction: ActionHandlers<Country>['onCustomAction'] = (action, data) => {
+  private handleCustomAction: ActionHandlers<Country>['onCustomAction'] = (action, data) => {    
     if (action === 'reload') {
       this.fetchCountries();
     }
@@ -283,18 +286,22 @@ export class CountryTableComponent implements OnInit {
           }));
     this.exportItems.set(targets);
 
-    console.log(targets);
-
     this.alert.showTemplate(
       this.tpl, 
       {
         message: '',
         title: 'Export info',
         showFooter: true,
+        size: 'lg',
         showConfirmButton: true,
         context: { items: this.exportItems() },
         onConfirm: () => {
           const result = this.exportItems();
+
+          this.notifications.info(
+            JSON.stringify(result, null, 2),
+            10000
+          );
           console.log('EXPORT RESULT', result);
         },
       }

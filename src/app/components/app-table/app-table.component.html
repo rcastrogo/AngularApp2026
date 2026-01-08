@@ -7,7 +7,7 @@
   Información de registros
   ===================================================================================
   -->
-  <div class="text-sm w-full md:w-auto md:flex-1">
+  <div class="text-sm w-full md:hidden border-b">
     @if (sortedRows().length === 0) {
       {{ i18n.t('app-table.no-rows', { entity: entity }) }}
     } @else {
@@ -15,8 +15,9 @@
       @if (selected().size > 0) {
          {{ i18n.t('app-table.selected', { count: selected().size }) }}
       }
-      -
-      {{ i18n.t('app-table.page', { page: currentPage(), total: totalPages()}) }}
+      <span class="inline-block float-end">
+        {{ i18n.t('app-table.page', { page: currentPage(), total: totalPages()}) }}        
+      </span>
     }
   </div>
   <!-- 
@@ -24,84 +25,99 @@
   Botones estandart
   ===================================================================================
   -->
-  <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end md:justify-center">
-    <button class="tool-bar-button p-2!" (click)="refresh()" [disabled]="waitingForRows">
-      <lucide-icon name="refresh-ccw" />
-    </button>
-    <button class="tool-bar-button p-2!" (click)="insert()">
-      <lucide-icon name="plus" />
-    </button>
-    <button class="tool-bar-button p-2!" (click)="deleteSelected()" [disabled]="selected().size === 0">
-      <lucide-icon name="trash-2" />
-    </button>
-    <button class="tool-bar-button p-2!" (click)="editSelected()" [disabled]="selected().size !== 1">
-      <lucide-icon name="edit" />
-    </button>
-    <!-- 
-    ===================================================================================
-    Botones dinámicos
-    ===================================================================================
-    -->
-    @for (btn of actionButtons(); track btn.key) {
-      <button
-        class="tool-bar-button p-2!"
-        [disabled]="!isButtonEnabled(btn)"
-        (click)="handleOnButtonClick(btn)"
-        [attr.title]="i18n.resolve(btn.label)"
-      >
-        @if (btn.icon) {
-          <lucide-icon [name]="btn.icon" />
-          <span class="hidden">
-            {{ i18n.resolve(btn.label) }}
-          </span>
+  <div class="w-full overflow-x-auto md:overflow-visible">
+    <div class="flex items-center gap-2 w-full">
+      <span class="hidden md:block flex-1 text-sm text-left">
+        @if (sortedRows().length === 0) {
+          {{ i18n.t('app-table.no-rows', { entity: entity }) }}
         } @else {
-          {{ i18n.resolve(btn.label) }}
+          {{ i18n.t('app-table.rows', { entity: entity, count: sortedRows().length }) }}
+          @if (selected().size > 0) {
+            {{ i18n.t('app-table.selected', { count: selected().size }) }}
+          }
+          <br />
+          {{ i18n.t('app-table.page', { page: currentPage(), total: totalPages()}) }}
         }
-      </button>
-    }
-  <!-- </div> -->
-  <!-- 
-  ===================================================================================
-  Botones navegación
-  ===================================================================================
-  -->
-  <!-- <div class="flex items-center w-full md:w-auto justify-end md:justify-center"> -->
-    <button class="tool-bar-button p-2!" (click)="firstPage()" [disabled]="currentPage() === 1">
-      <lucide-icon name="chevrons-left" />
-    </button>
-    <button class="tool-bar-button p-2!" (click)="prevPage()" [disabled]="currentPage() === 1">
-      <lucide-icon name="chevron-left" />
-    </button>
-    <input
-      type="text"
-      class="w-8 sm:w-10 h-9 text-center border-accent rounded"
-      [value]="currentPage()"
-      (change)="goToPage($event)"
-      [min]="1"
-      [max]="totalPages()"
-    />
-    <button class="tool-bar-button p-2!" (click)="nextPage()" [disabled]="currentPage() === totalPages()">
-      <lucide-icon name="chevron-right" />
-    </button>
-    <button class="tool-bar-button p-2!" (click)="lastPage()" [disabled]="currentPage() === totalPages()">
-      <lucide-icon name="chevrons-right" />
-    </button>
-    <!-- 
-    ===============================================
-    Menú contextual
-    ===============================================
-    -->
-    <app-table-menu 
-      [pageSize]="pageSize()"
-      [selectedRows]="selected()"
-      [rowsCount]="sortedRows().length"
-      [columns]="columns"
-      [visibleColumnIds]="visibleColumnIds()"
-      [menuItems]="buttons"
-      (toggleColumn)="handleToggleColumn($event)"
-      (actionTriggered)="onAction($event)"
-    />
-
+      </span>
+      <div class="flex items-center gap-2 w-max ml-auto">  
+        <button class="tool-bar-button p-2! shrink-0" (click)="refresh()" [disabled]="waitingForRows">
+          <lucide-icon name="refresh-ccw" />
+        </button>
+        <button class="tool-bar-button p-2! shrink-0" (click)="insert()">
+          <lucide-icon name="plus" />
+        </button>
+        <button class="tool-bar-button p-2! shrink-0" (click)="deleteSelected()" [disabled]="selected().size === 0">
+          <lucide-icon name="trash-2" />
+        </button>
+        <button class="tool-bar-button p-2! shrink-0" (click)="editSelected()" [disabled]="selected().size !== 1">
+          <lucide-icon name="edit" />
+        </button>
+        <!-- 
+        ===================================================================================
+        Botones dinámicos
+        ===================================================================================
+        -->
+        @for (btn of actionButtons(); track btn.key) {
+          <button
+            class="tool-bar-button p-2! shrink-0"
+            [disabled]="!isButtonEnabled(btn)"
+            (click)="handleOnButtonClick(btn)"
+            [attr.title]="i18n.resolve(btn.label)"
+          >
+            @if (btn.icon) {
+              <lucide-icon [name]="btn.icon" />
+              <span class="hidden">
+                {{ i18n.resolve(btn.label) }}
+              </span>
+            } @else {
+              {{ i18n.resolve(btn.label) }}
+            }
+          </button>
+        }
+      <!-- </div> -->
+      <!-- 
+      ===================================================================================
+      Botones navegación
+      ===================================================================================
+      -->
+      <!-- <div class="flex items-center w-full md:w-auto justify-end md:justify-center"> -->
+        <button class="tool-bar-button p-2! shrink-0" (click)="firstPage()" [disabled]="currentPage() === 1">
+          <lucide-icon name="chevrons-left" />
+        </button>
+        <button class="tool-bar-button p-2! shrink-0" (click)="prevPage()" [disabled]="currentPage() === 1">
+          <lucide-icon name="chevron-left" />
+        </button>
+        <input
+          type="text"
+          class="w-8 sm:w-10 h-9 text-center border-accent rounded"
+          [value]="currentPage()"
+          (change)="goToPage($event)"
+          [min]="1"
+          [max]="totalPages()"
+        />
+        <button class="tool-bar-button p-2! shrink-0" (click)="nextPage()" [disabled]="currentPage() === totalPages()">
+          <lucide-icon name="chevron-right" />
+        </button>
+        <button class="tool-bar-button p-2! shrink-0" (click)="lastPage()" [disabled]="currentPage() === totalPages()">
+          <lucide-icon name="chevrons-right" />
+        </button>
+        <!-- 
+        ===============================================
+        Menú contextual
+        ===============================================
+        -->
+        <app-table-menu 
+          [pageSize]="pageSize()"
+          [selectedRows]="selected()"
+          [rowsCount]="sortedRows().length"
+          [columns]="columns"
+          [visibleColumnIds]="visibleColumnIds()"
+          [menuItems]="buttons"
+          (toggleColumn)="handleToggleColumn($event)"
+          (actionTriggered)="onAction($event)"
+        />
+      </div>
+    </div>
   </div>
 </div>
 
@@ -139,7 +155,7 @@ TABLE
             [ngClass]="[
               'py-2 select-none',              
               col.sorter ? 'cursor-pointer' : '',
-              col.sorter ? 'hover:text-blue-300' : '',
+              col.sorter ? 'hover:text-blue-800' : '',
               col.sorter ? 'hover:dark:text-yellow-300' : '',
               col.className || ''
             ]"

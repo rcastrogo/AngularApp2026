@@ -1,24 +1,43 @@
 <!-- eslint-disable @angular-eslint/template/click-events-have-key-events -->
 @if(isOpen()){
-  <div class="fixed inset-0 z-9998 bg-black/80 transition-all duration-300 js-back-drop"></div>
+  @if (size() !== 'fullscreen') {
+    <div class="fixed inset-0 z-9998 bg-black/80 transition-all duration-300 js-back-drop"></div>
+  }  
   <div cdkTrapFocus [cdkTrapFocusAutoCapture]="true" class="fixed inset-0 z-9999 overflow-y-auto">
     <div (click)="onBackdropClick($event)" tabindex="-1"
       class="flex min-h-full items-center justify-center p-4 text-center js-back-drop">
 
-      <div role="dialog"
-        class="bg-white dark:bg-slate-900 rounded-lg max-w-sm border border-slate-200 dark:border-slate-800 fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] grid w-full gap-0 p-4 shadow-xl duration-200"
-        tabindex="-1" style="pointer-events: auto;">
+      <div
+        role="dialog"
+        class="
+            bg-white dark:bg-slate-900
+            border border-slate-200 dark:border-slate-800
+            shadow-xl
+            fixed
+            top-1/2 left-1/2
+            -translate-x-1/2 -translate-y-1/2
+            p-4
+            flex flex-col overflow-hidden
+          "
+        [class]="sizeClass()"
+        [class.rounded-lg]="size() !== ALERT_SIZE_CLASS_MAP.fullscreen"
+        tabindex="-1"
+        style="pointer-events: auto;"
+      >
 
         @if(showTitle()){
-          <h2 class="text-lg leading-none font-semibold text-slate-900 dark:text-white">
-            {{title()}}
-          </h2>
-          <div role="none" class="bg-slate-200 dark:bg-slate-800 h-px w-full mt-2 mb-2"></div>
+          <div class="shrink-0">
+            <h2 class="text-lg leading-none font-semibold text-slate-900 dark:text-white">
+              {{ title() }}
+            </h2>
+            <div class="bg-slate-200 dark:bg-slate-800 h-px w-full mt-2 mb-2"></div>
+          </div>
         }
+
         
         <div tabindex="0" class="sr-only"></div>
 
-        <div class="flex flex-row items-center gap-3 w-full">
+        <div class="flex-1  items-center gap-4 overflow-y-auto">
           @if(icon()){
             <div class="shrink-0 text-slate-900 dark:text-white">
               <lucide-angular [img]="icon()" class="size-9"></lucide-angular>
@@ -40,20 +59,36 @@
           }
         </div>
         @if(showFooter()){
-          <div role="none" class="bg-slate-200 dark:bg-slate-800 h-px w-full mt-2 mb-2"></div>
-          <div class="flex flex-row justify-center-safe gap-2">
-            <button type="button" (click)="onCancel()"
-              class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 py-2 px-6 cursor-pointer">
-              {{ literals()[0] }}
-            </button>
-            @if(showConfirmBtn()){
-              <button type="button" (click)="onConfirm()"
-                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 py-2 px-6 cursor-pointer">
-                {{ literals()[1] }}
-              </button>              
-            }
+          <div class="shrink-0">
+            <div class="bg-slate-200 dark:bg-slate-800 h-px w-full mt-2 mb-2"></div>
+            <div class="flex justify-center-safe gap-2">
+              <button
+                type="button"
+                (click)="onCancel()"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors
+                      bg-slate-900 dark:bg-slate-100
+                      text-white dark:text-slate-900
+                      hover:bg-slate-800 dark:hover:bg-slate-200
+                      py-2 px-6">
+                {{ literals()[0] }}
+              </button>
+
+              @if(showConfirmBtn()){
+                <button
+                  type="button"
+                  (click)="onConfirm()"
+                  class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors
+                        bg-slate-900 dark:bg-slate-100
+                        text-white dark:text-slate-900
+                        hover:bg-slate-800 dark:hover:bg-slate-200
+                        py-2 px-6">
+                  {{ literals()[1] }}
+                </button>
+              }
+            </div>
           </div>
         }
+
       </div>
 
     </div>

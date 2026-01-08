@@ -1,15 +1,23 @@
 import { Component, inject, TemplateRef, ViewChild } from '@angular/core';
 
-import { literals } from '~/components/app-alert/app-alert.component';
+import {
+  LucideAngularModule,
+  CircleX,
+  TriangleAlert,
+  Check,
+  NotepadText,
+} from 'lucide-angular';
+
+import { AlertSize, literals } from '~/components/app-alert/app-alert.component';
 import { AlertService } from '~/services/alert.service';
+import { NotificationService } from '~/services/notification.service';
 import { TranslationService } from '~/services/translation.service';
 
 @Component({
   selector: 'app-contact',
   standalone: true,
-  imports: [],
+  imports: [LucideAngularModule],
   template: `
-
     <ng-template #htmlAlert>
       <div class="flex w-full flex-col items-center gap-4">
         <h2 class="text-4xl font-bold">
@@ -29,8 +37,8 @@ import { TranslationService } from '~/services/translation.service';
       <h2 class="text-3xl font-bold mb-4">{{ i18n.t('contact.info.title') }}</h2>
       <p>{{ i18n.t('contact.info.description') }}</p>
 
-       <!-- Botones de prueba -->
-      <div class="flex flex-wrap gap-3 mt-6">
+      <h2 class="text-3xl font-bold my-4">Alerts</h2>
+      <div class="flex flex-wrap gap-3">
 
         <button
           class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
@@ -63,12 +71,86 @@ import { TranslationService } from '~/services/translation.service';
         </button>
         
       </div>
+
+      <h2 class="text-3xl font-bold my-4">Notificaciones</h2>
+      <div class="flex flex-wrap gap-3">
+        <button
+          class="px-4 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900"
+          (click)="notifications.info('Información', 5000)">
+          <lucide-angular name="info" class="size-5 shrink-0"></lucide-angular>
+        </button>
+        <button
+          class="px-4 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900"
+          (click)="notifications.success('Éxito')">
+          <lucide-angular [img]="successIcon" class="size-5 shrink-0"></lucide-angular>
+        </button>           
+        <button
+          class="px-4 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900"
+          (click)="notifications.error('Error', 5000)">
+          <lucide-angular [img]="errorIcon" class="size-5 shrink-0"></lucide-angular>
+        </button>
+        <button
+          class="px-4 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900"
+          (click)="notifications.warning('Aviso', 500)">
+          <lucide-angular [img]="warningIcon" class="size-5 shrink-0"></lucide-angular>
+        </button>
+        <button
+          class="px-4 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900"
+          (click)="notifications.show('Mensaje normal', 10000)">
+          <lucide-angular [img]="textIcon" class="size-5 shrink-0"></lucide-angular>          
+        </button>
+        <button
+          class="px-4 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900"
+          (click)="notifications.warning('Aviso', -1)">
+          <lucide-angular [img]="warningIcon" class="size-5 shrink-0"></lucide-angular>
+        </button>                     
+      </div>
+
+      <h2 class="text-3xl font-bold my-4">Diálogos</h2>
+      <div class="flex flex-wrap gap-3">
+        <button
+          class="px-4 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900"
+          (click)="showTemplateAlert('sm')">
+          sm
+        </button>
+        <button
+          class="px-4 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900"
+          (click)="showTemplateAlert('md')">
+          md
+        </button>
+        <button
+          class="px-4 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900"
+          (click)="showTemplateAlert('lg')">
+          lg
+        </button>
+        <button
+          class="px-4 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900"
+          (click)="showTemplateAlert('xl')">
+          xl
+        </button>
+        <button
+          class="px-4 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900"
+          (click)="showTemplateAlert('fullscreen')">
+          fullscreen
+        </button>
+        <button
+          class="px-4 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900"
+          (click)="showHtmlAlert('xl')">
+          fullscreen
+        </button>                        
+      </div>
+
   `
 })
 export class ContactComponent {
   i18n = inject(TranslationService);
   alert = inject(AlertService);
+  notifications = inject(NotificationService);
 
+  readonly errorIcon = CircleX;
+  readonly warningIcon = TriangleAlert;
+  readonly successIcon = Check;
+  readonly textIcon = NotepadText;
   showInfo() {
     this.alert.showInfo(
       'This is an informational alert that closes automatically.',
@@ -147,12 +229,67 @@ export class ContactComponent {
 
   @ViewChild('htmlAlert') tpl!: TemplateRef<unknown>;
 
-  showTemplateAlert() {
+  showTemplateAlert(size: AlertSize = 'sm') {
     this.alert.showTemplate(this.tpl, {
       message: '',
       title: 'Template mode',
-      showFooter: false,
-      autoCloseMs: 5000,
+      showFooter: true,
+      autoCloseMs: -1,
+      size:size,
+    });
+  }
+
+  showHtmlAlert(size: AlertSize = 'sm') {
+    const html = `
+      <div class="flex flex-col gap-3">
+
+        <p class="text-sm text-slate-600 dark:text-slate-300">
+          Este diálogo contiene una lista larga para probar el scroll vertical.
+        </p>
+
+        <ul class="divide-y divide-slate-200 dark:divide-slate-700 ">
+          ${Array.from({ length: 20 })
+            .map(
+              (_, i) => `
+            <li class="py-3 flex items-start gap-3">
+              <span class="text-xs font-mono text-slate-400 w-6 text-right">
+                ${i + 1}
+              </span>
+              
+              <div class="flex-1">
+                <button type="button" 
+                  class="online-flex items-center justify-center rounded-md text-sm font-medium transition-colors
+                  bg-slate-900 dark:bg-slate-100
+                  text-white dark:text-slate-900
+                  hover:bg-slate-800 dark:hover:bg-slate-200
+                  py-2 px-6">
+                    ${i + 1}
+                </button>
+                <p class="font-medium text-slate-800 dark:text-slate-100">
+                  Elemento ${i + 1}
+                </p>
+                <p class="text-sm text-slate-600 dark:text-slate-400">
+                  Descripción larga del elemento ${i + 1}. Este texto está aquí
+                  para forzar el crecimiento vertical del contenido y comprobar
+                  cómo responde el scroll dentro del diálogo.
+                </p>
+              </div>
+            </li>
+          `
+            )
+            .join('')}
+        </ul>
+
+      </div>
+      `;
+
+    this.alert.showInfo(html, {
+      asHtml: true, 
+      icon: undefined, 
+      disableClose: true,
+      title: 'Html mode',
+      showFooter: true,
+      size:size,
     });
   }
 }

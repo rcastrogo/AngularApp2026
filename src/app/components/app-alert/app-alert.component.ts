@@ -17,12 +17,26 @@ import {
   LucideIconData,
 } from 'lucide-angular';
 
-
 import { TranslationService } from '~/services/translation.service';
 
 export const literals = {
   noYes : ['general.action.no', 'general.action.yes' ]
 }
+
+export type AlertSize =
+  | 'sm'
+  | 'md'
+  | 'lg'
+  | 'xl'
+  | 'fullscreen';
+
+const ALERT_SIZE_CLASS_MAP: Record<AlertSize, string> = {
+  sm: 'w-[400px]',
+  md: 'w-[600px]',
+  lg: 'w-[75vw] max-h-[75vh]',
+  xl: 'w-[90vw] max-h-[90vh]',
+  fullscreen: 'fixed inset-0 w-screen h-screen max-w-none rounded-none',
+};
 
 type AlertMode = 'text' | 'html' | 'template';
 export interface AlertOptions {
@@ -41,6 +55,7 @@ export interface AlertOptions {
   onClose?: () => void;
   literals?: string[];
   disableClose?: boolean;
+  size?: AlertSize;
 }
 
 @Component({
@@ -65,7 +80,8 @@ export class AlertComponent {
   #confirm = signal(false);
   #literals = signal<string[]>([]);
   #disableClose = signal(false);
-  
+  #size = signal<AlertSize>('sm');
+ 
   isOpen = signal(false);
   isHtml = computed(() => this.#mode() === 'html');
   isTemplate = computed(() => this.#mode() === 'template');
@@ -83,7 +99,8 @@ export class AlertComponent {
     ];
     this.#literals()
   });
-
+  sizeClass = computed(() => ALERT_SIZE_CLASS_MAP[this.#size()]);
+  size = computed(() => this.#size());
   template = computed(() => this.#template());
   message = computed<string | SafeHtml>(() => {
     if (this.isHtml()) {
@@ -91,6 +108,8 @@ export class AlertComponent {
     }
     return this.#message();
   });
+
+  ALERT_SIZE_CLASS_MAP = ALERT_SIZE_CLASS_MAP;
 
   constructor() {
     afterNextRender(() => {
@@ -117,6 +136,7 @@ export class AlertComponent {
     this.#hasFooter.set(options.showFooter ?? false);
     this.#confirm.set(options.showConfirmButton ?? false)
     this.#disableClose.set(!!options.disableClose);
+    this.#size.set(options.size ?? 'sm');
 
     if (options.asTemplate && options.template) {
       this.#mode.set('template');
@@ -164,13 +184,11 @@ export class AlertComponent {
   }
 
   onCancel(): void {
-    if (this.#disableClose()) return;
     this.cancelled.emit();
     this.close();
   }
 
   onConfirm(): void {
-    console.log('this.onConfirm()');
     this.confirmed.emit();
     this.close();
   }
