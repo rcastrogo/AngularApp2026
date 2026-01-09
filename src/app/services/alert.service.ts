@@ -11,9 +11,10 @@ import {
 import {
   Info,
   TriangleAlert,
-  X,
+  // X,
   Check,
   CircleQuestionMark,
+  CircleX,
 } from 'lucide-angular';
 
 import { AlertComponent, AlertOptions } from '~/components/app-alert/app-alert.component';
@@ -72,7 +73,7 @@ export class AlertService {
 
   showError(message: string, options?: Partial<AlertOptions>) {
     this.show({
-      icon: X,
+      icon: CircleX,
       message,
       showFooter: true,
       ...options,

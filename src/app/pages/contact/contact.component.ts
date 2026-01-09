@@ -103,7 +103,19 @@ import { TranslationService } from '~/services/translation.service';
           class="px-4 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900"
           (click)="notifications.warning('Aviso', -1)">
           <lucide-angular [img]="warningIcon" class="size-5 shrink-0"></lucide-angular>
-        </button>                     
+        </button>          
+        <button
+          class="px-4 flex gap-2 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900 items-center"
+          (click)="notifications.show(large_message, 10000)">
+          <lucide-angular [img]="textIcon" class="size-5 shrink-0"></lucide-angular> 
+          Multiline         
+        </button>
+        <button
+          class="px-4 flex gap-2 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900 items-center"
+          (click)="notifications.warning(large_message, 10000)">
+          <lucide-angular [img]="warningIcon" class="size-5 shrink-0"></lucide-angular> 
+          Multiline         
+        </button>                   
       </div>
 
       <h2 class="text-3xl font-bold my-4">Diálogos</h2>
@@ -136,8 +148,13 @@ import { TranslationService } from '~/services/translation.service';
         <button
           class="px-4 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900"
           (click)="showHtmlAlert('xl')">
-          fullscreen
-        </button>                        
+          Html xl
+        </button>
+        <button
+          class="px-4 py-2 rounded-full bg-gray-600 text-white hover:bg-slate-900"
+          (click)="showHtmlAlert('fullscreen')">
+          Html fullscreen
+        </button>                             
       </div>
 
   `
@@ -161,13 +178,23 @@ export class ContactComponent {
     );
   }
 
+  readonly large_message = 'Are you sure you want to continue?\n\n' +
+    'This action may have important consequences and cannot be undone once it is completed.\n\n' +
+    'Please take a moment to review the following considerations:\n\n' +
+    '- Any unsaved changes will be permanently lost.\n' +
+    '- Active processes related to this operation will be stopped immediately.\n' +
+    '- Users currently depending on this resource may experience interruptions.\n\n' +
+    'If you are unsure, it is recommended to cancel this action and review the configuration again.\n\n' +
+    'Do you still want to proceed?';
+
   showWarning() {
     this.alert.showWarning(
-      'Are you sure you want to continue?',
+      this.large_message,
       {
         title: 'Confirmation required',
         onConfirm: () => console.log('User confirmed'),
         onCancel: () => console.log('User cancelled'),
+        size: 'md',
       }
     );
   }
@@ -241,30 +268,21 @@ export class ContactComponent {
 
   showHtmlAlert(size: AlertSize = 'sm') {
     const html = `
-      <div class="flex flex-col gap-3">
-
-        <p class="text-sm text-slate-600 dark:text-slate-300">
-          Este diálogo contiene una lista larga para probar el scroll vertical.
-        </p>
-
+      <div class="flex flex-col gap-3 p-4">
         <ul class="divide-y divide-slate-200 dark:divide-slate-700 ">
           ${Array.from({ length: 20 })
             .map(
               (_, i) => `
-            <li class="py-3 flex items-start gap-3">
-              <span class="text-xs font-mono text-slate-400 w-6 text-right">
-                ${i + 1}
-              </span>
-              
-              <div class="flex-1">
-                <button type="button" 
-                  class="online-flex items-center justify-center rounded-md text-sm font-medium transition-colors
-                  bg-slate-900 dark:bg-slate-100
-                  text-white dark:text-slate-900
-                  hover:bg-slate-800 dark:hover:bg-slate-200
-                  py-2 px-6">
-                    ${i + 1}
-                </button>
+            <li class="py-3 flex items-center gap-3">
+              <button type="button" 
+                class="online-flex items-center justify-center rounded-md text-sm font-medium transition-colors
+                bg-slate-900 dark:bg-slate-100
+                text-white dark:text-slate-900
+                hover:bg-slate-800 dark:hover:bg-slate-200
+                py-2 px-6">
+                  ${i + 1}
+              </button>                 
+              <div class="flex-1 justify-items-start text-left">
                 <p class="font-medium text-slate-800 dark:text-slate-100">
                   Elemento ${i + 1}
                 </p>
@@ -288,7 +306,7 @@ export class ContactComponent {
       icon: undefined, 
       disableClose: true,
       title: 'Html mode',
-      showFooter: true,
+      subTitle: 'Este diálogo contiene una lista larga para probar el scroll vertical.',
       size:size,
     });
   }

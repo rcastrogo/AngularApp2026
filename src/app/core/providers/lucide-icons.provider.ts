@@ -3,6 +3,7 @@ import { importProvidersFrom } from '@angular/core';
 
 import {
   LucideAngularModule,
+  X,
   Home,
   Info,
   Mail,
@@ -41,6 +42,7 @@ import {
 
 
 const icons = {
+  X,
   Menu,
   Check,
   Home,

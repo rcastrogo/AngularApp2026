@@ -16,4 +16,4 @@ export type NotificationPosition =
   | 'bottom-right'
   | 'bottom-left'
   | 'bottom-center';
-export const NOTIFICATION_POSITION: NotificationPosition = 'top-center';
+export const NOTIFICATION_POSITION: NotificationPosition = 'top-right';

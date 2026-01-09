@@ -31,8 +31,8 @@ export type AlertSize =
   | 'fullscreen';
 
 const ALERT_SIZE_CLASS_MAP: Record<AlertSize, string> = {
-  sm: 'w-[400px]',
-  md: 'w-[600px]',
+  sm: 'w-[400px] max-w-[85vw]',
+  md: 'w-[600px] max-w-[75vw]',
   lg: 'w-[75vw] max-h-[75vh]',
   xl: 'w-[90vw] max-h-[90vh]',
   fullscreen: 'fixed inset-0 w-screen h-screen max-w-none rounded-none',
@@ -41,6 +41,7 @@ const ALERT_SIZE_CLASS_MAP: Record<AlertSize, string> = {
 type AlertMode = 'text' | 'html' | 'template';
 export interface AlertOptions {
   title?: string;
+  subTitle?: string;
   message: string;
   asHtml?: boolean;
   asTemplate?: boolean;
@@ -72,6 +73,7 @@ export class AlertComponent {
 
   #mode = signal<AlertMode>('text');
   #title = signal('');
+  #subTitle = signal('');
   #message = signal('');
   #template = signal<TemplateRef<unknown> | null>(null);
   #context = signal<unknown>(null);
@@ -88,8 +90,10 @@ export class AlertComponent {
   isText = computed(() => this.#mode() === 'text');
   showFooter = computed(() => this.#hasFooter());
   showTitle = computed(() => this.#title().length > 0);
+  showSubTitle = computed(() => this.#subTitle().length > 0);
   showConfirmBtn = computed(() => ( this.#confirm()))
   title = computed(() => this.#title());
+  subTitle = computed(() => this.#subTitle());
   icon = computed(() => this.#icon());
   context = computed(() => this.#context());
   literals = computed(() => {
@@ -137,6 +141,7 @@ export class AlertComponent {
     this.#confirm.set(options.showConfirmButton ?? false)
     this.#disableClose.set(!!options.disableClose);
     this.#size.set(options.size ?? 'sm');
+    this.#subTitle.set(options.subTitle ?? '');
 
     if (options.asTemplate && options.template) {
       this.#mode.set('template');

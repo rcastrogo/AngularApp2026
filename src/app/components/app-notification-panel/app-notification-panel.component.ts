@@ -56,7 +56,7 @@ let notificationId = 1;
   imports: [LucideAngularModule],
   template: `
     <div 
-      class="fixed z-50 w-96 max-w-full flex flex-col gap-2"
+      class="fixed z-50 w-96 max-w-[95dvw] flex flex-col gap-2"
       [class]="positionClass()"
       >
       @for (notification of notifications(); track notification.id) {
@@ -64,14 +64,19 @@ let notificationId = 1;
           class="relative bg-white dark:bg-gray-800
                  border border-gray-300 dark:border-gray-700
                  rounded-lg shadow-lg p-4"
-                  [style.transform]="
-                    notification.swiping
-                      ? 'translateX(' + (notification.offsetX ?? 0) + 'px)'
-                      : null
-                  "
-                  [style.--target.px]="notification.swipeDirection === 'right' ? 300 : -300"
-                  [class.animate-slide-out-x]="notification.closing && notification.swipeClosing"
-                  [class.animate-slide-out-y]="notification.closing && !notification.swipeClosing"
+          [style.transform]="
+            notification.offsetX !== null
+              ? 'translateX(' + notification.offsetX + 'px)'
+              : null
+          "
+          [style.--target]="
+            notification.swipeDirection === 'right'
+              ? '100vw'
+              : '-100vw'
+          "
+          [style.--offset.px]="notification.offsetX ?? 0"
+          [class.animate-slide-out-x]="notification.closing && notification.swipeClosing"
+          [class.animate-slide-out-y]="notification.closing && !notification.swipeClosing"
           style="touch-action: pan-y"
           (pointerdown)="onPointerDown($event, notification)"
           (pointermove)="onPointerMove($event, notification)"
@@ -82,19 +87,18 @@ let notificationId = 1;
             (click)="close(notification.id)"
             class="
               group absolute top-2 right-2 w-8 h-8 flex items-center justify-center               
-              transition-colors
+              rounded-md
+              text-slate-500 hover:text-slate-900
+              hover:bg-slate-100
+              dark:text-slate-400 dark:hover:text-white
+              dark:hover:bg-slate-900
             "
             aria-label="Close notification"
           >
             <lucide-angular 
-              [img]="closeIcon" 
+              name="x" 
               class="
-                  size-6 shrink-0
-                text-gray-500
-                group-hover:text-gray-800
-                dark:text-gray-400
-                dark:group-hover:text-white
-                transition-colors
+                size-5 shrink-0
               "></lucide-angular>
           </button>
           <div class="pr-8 flex items-start gap-3 text-sm text-gray-800 dark:text-gray-200">
@@ -104,8 +108,7 @@ let notificationId = 1;
                 class="size-6 shrink-0"
               ></lucide-angular>
             }
-
-            <p class="wrap-break-word">
+            <p class="wrap-break-word whitespace-pre-line ">
               {{ notification.message }}
             </p>
           </div>
@@ -125,7 +128,6 @@ let notificationId = 1;
         opacity: 0;
       }
     }
-
     /* Animación horizontal (swipe) */
     @keyframes slideOutX {
       from {
@@ -137,14 +139,12 @@ let notificationId = 1;
         opacity: 0;
       }
     }
-
     /* Clases */
     .animate-slide-out-y {
       animation: slideOutY 0.5s ease-in forwards;
     }
-
     .animate-slide-out-x {
-      animation: slideOutX 0.3s ease-in forwards;
+      animation: slideOutX 0.5s ease-in forwards;
     }
   `],
 })
@@ -262,28 +262,62 @@ export class AppNotificationPanel {
     const offsetX = n.offsetX ?? 0;
     const abs = Math.abs(offsetX);
 
-    this.notifications.update(list =>
-      list.map(item =>
-        item.id === n.id
-          ? {
-              ...item,
-              swiping: false,
-              swipeDirection: offsetX > 0 ? 'right' : 'left',
-            }
-          : item
-      )
-    );
-
     if (abs > SWIPE_THRESHOLD) {
+      this.notifications.update(list =>
+        list.map(item =>
+          item.id === n.id
+            ? {
+                ...item,
+                swiping: false,        
+                swipeClosing: true,
+                swipeDirection: offsetX > 0 ? 'right' : 'left',
+              }
+            : item
+        )
+      );
+
       this.close(n.id, true);
     } else {
       this.notifications.update(list =>
         list.map(item =>
           item.id === n.id
-            ? { ...item, offsetX: 0 }
+            ? {
+                ...item,
+                swiping: false,
+                offsetX: 0,
+              }
             : item
         )
       );
     }
   }
+
+  // onPointerUp(n: NotificationItem) {
+  //   const offsetX = n.offsetX ?? 0;
+  //   const abs = Math.abs(offsetX);
+
+  //   this.notifications.update(list =>
+  //     list.map(item =>
+  //       item.id === n.id
+  //         ? {
+  //             ...item,
+  //             swiping: false,
+  //             swipeDirection: offsetX > 0 ? 'right' : 'left',
+  //           }
+  //         : item
+  //     )
+  //   );
+
+  //   if (abs > SWIPE_THRESHOLD) {
+  //     this.close(n.id, true);
+  //   } else {
+  //     this.notifications.update(list =>
+  //       list.map(item =>
+  //         item.id === n.id
+  //           ? { ...item, offsetX: 0 }
+  //           : item
+  //       )
+  //     );
+  //   }
+  // }
 }

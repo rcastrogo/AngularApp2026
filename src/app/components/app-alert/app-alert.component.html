@@ -27,40 +27,73 @@
 
         @if(showTitle()){
           <div class="shrink-0">
-            <h2 class="text-lg leading-none font-semibold text-slate-900 dark:text-white">
-              {{ title() }}
-            </h2>
-            <div class="bg-slate-200 dark:bg-slate-800 h-px w-full mt-2 mb-2"></div>
+            <div class="flex items-center justify-center gap-4">
+              <h2 class="flex-1 text-lg leading-none font-semibold text-slate-900 dark:text-white">
+                {{ title() }}
+              </h2>
+              <button
+                type="button"
+                (click)="onCancel()"
+                aria-label="Close dialog"
+                class="
+                  shrink-0
+                  inline-flex items-center justify-center
+                  w-8 h-8
+                  rounded-md
+                  text-slate-500 hover:text-slate-900
+                  hover:bg-slate-100
+                  dark:text-slate-400 dark:hover:text-white
+                  dark:hover:bg-slate-800
+                  transition-colors
+                "
+              >
+                <lucide-angular name="x" class="size-5"></lucide-angular>
+              </button>
+            </div>
+
+            @if(showSubTitle()){
+              <div class="bg-slate-200 dark:bg-slate-800 h-px w-full m-2"></div>              
+              <p class="text-left text-slate-900 dark:text-white">
+                {{ subTitle() }}
+              </p>              
+            }
+            <div class="bg-slate-200 dark:bg-slate-800 h-px w-full mt-2"></div>
           </div>
         }
-
         
         <div tabindex="0" class="sr-only"></div>
 
-        <div class="flex-1  items-center gap-4 overflow-y-auto">
+        <div class="flex gap-4 pt-2 min-h-0">
           @if(icon()){
-            <div class="shrink-0 text-slate-900 dark:text-white">
-              <lucide-angular [img]="icon()" class="size-9"></lucide-angular>
-            </div>            
-          }
-          @if (isTemplate()) {
-            <ng-container *ngTemplateOutlet="template(); context: context()"></ng-container>
-          }
-          @else if (isHtml()) {
-            <div
-              class="text-slate-600 dark:text-slate-400 w-full"
-              [innerHTML]="message()">
+            <div class=" text-slate-900 dark:text-white mb-2">
+              <div class="border p-2 rounded-md">
+                <lucide-angular [img]="icon()" class="size-9"></lucide-angular>
+              </div>
             </div>
           }
-          @else {
-            <p class="text-slate-600 dark:text-slate-400 text-left">
-              {{ message() }}
-            </p>
-          }
+          <div class="flex-1 min-h-0 overflow-y-auto max-h-[60dvh]">
+            @if (isTemplate()) {
+              <ng-container *ngTemplateOutlet="template(); context: context()"></ng-container>
+            }
+            @else if (isHtml()) {
+              <div
+                class="text-slate-600 dark:text-slate-400 overflow-auto"
+                [innerHTML]="message()">
+              </div>
+            }
+            @else {
+              <p class="
+                text-slate-600 dark:text-slate-400 text-left whitespace-pre-line 
+                overflow-auto">
+                {{ message() }}
+              </p>
+            }
+          </div>
         </div>
+
         @if(showFooter()){
           <div class="shrink-0">
-            <div class="bg-slate-200 dark:bg-slate-800 h-px w-full mt-2 mb-2"></div>
+            <div class="bg-slate-200 dark:bg-slate-800 h-px w-full mb-2"></div>
             <div class="flex justify-center-safe gap-2">
               <button
                 type="button"
